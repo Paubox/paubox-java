@@ -14,7 +14,6 @@ public class EmailService implements EmailInterface {
 	public GetEmailDispositionResponse GetEmailDisposition(String sourceTrackingId) throws Exception {
 		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId ;
 		String responseStr = APIHelper.callToAPIByGet(url, getAuthorizationHeader());
-		System.out.println(responseStr);
 		ObjectMapper mapper = new ObjectMapper();
 		GetEmailDispositionResponse response = (GetEmailDispositionResponse) mapper.readValue(responseStr,
 				GetEmailDispositionResponse.class);

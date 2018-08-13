@@ -15,9 +15,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.paubox.common.Constants;
 
 public class APIHelper {
-
 	
-	public static String callToAPIByGet(String baseAPIUrl, String authHeader) {
+	public static String callToAPIByGet(String baseAPIUrl, String authHeader) throws Exception {
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			
@@ -32,7 +31,7 @@ public class APIHelper {
 			HttpResponse response = httpClient.execute(getRequest);
 
 			if (Constants.HTTP_STATUS_SUCCESS != response.getStatusLine().getStatusCode()) {
-				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+				throw new Exception("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
 			}
 			BufferedReader rd = new BufferedReader(
 					new InputStreamReader(response.getEntity().getContent()));
@@ -47,14 +46,12 @@ public class APIHelper {
 
 		} catch (ClientProtocolException e) {
 
-			e.printStackTrace();
+			throw new Exception(e);
 
 		} catch (IOException e) {
 
-			e.printStackTrace();
+			throw new Exception(e);
 		}
-		
-		return null;
 	}
 
 	public  static String callToAPIByPost(String BaseAPIUrl, String authHeader, String requestBody) {

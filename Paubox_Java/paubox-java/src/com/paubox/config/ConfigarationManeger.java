@@ -10,9 +10,9 @@ import com.paubox.common.Constants;
 
 public class ConfigarationManeger {
 	
-	private static void readProperties(){
+	private static void readProperties(String fileAndPath){
 		try {
-			File file = new File("src/resources/config.properties");
+			File file = new File(fileAndPath);
 			FileInputStream fileInput = new FileInputStream(file);
 			Properties properties = new Properties();
 			properties.load(fileInput);
@@ -34,8 +34,8 @@ public class ConfigarationManeger {
 		
 	}
 	
-	public static void getProperties(){
-		readProperties();
+	public static void getProperties(String fileAndPath){
+		readProperties(fileAndPath);
 	}
 	
 	/*public static void main(String[] args) {
