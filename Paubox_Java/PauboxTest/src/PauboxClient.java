@@ -1,7 +1,7 @@
-import com.paubox.config.ConfigarationManeger;
-import com.paubox.data.GetEmailDispositionResponse;
-import com.paubox.service.EmailInterface;
-import com.paubox.service.EmailService;
+import paubox-java.src.com.paubox.config.ConfigarationManeger;
+import paubox-java.src.com.paubox.data.GetEmailDispositionResponse;
+import paubox-java.src.com.paubox.service.EmailInterface;
+import paubox-java.src.com.paubox.service.EmailService;
 
 public class PauboxClient {
 	
