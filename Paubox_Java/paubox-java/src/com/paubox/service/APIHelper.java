@@ -30,19 +30,9 @@ public class APIHelper {
 
 			HttpResponse response = httpClient.execute(getRequest);
 
-			if (Constants.HTTP_STATUS_SUCCESS != response.getStatusLine().getStatusCode()) {
-				throw new Exception("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
-			}
-			BufferedReader rd = new BufferedReader(
-					new InputStreamReader(response.getEntity().getContent()));
-
-				StringBuffer result = new StringBuffer();
-				String line = "";
-				while ((line = rd.readLine()) != null) {
-					result.append(line);
-				}
+			return processApiResponse(response);
 				
-			return result.toString();
+			 
 
 		} catch (ClientProtocolException e) {
 
@@ -54,35 +44,55 @@ public class APIHelper {
 		}
 	}
 
-	public  static String callToAPIByPost(String BaseAPIUrl, String authHeader, String requestBody) {
+	/**
+	 * @param response
+	 * @return
+	 * @throws Exception 
+	 */
+	private static String processApiResponse(HttpResponse response) throws Exception {
+		
+		if (Constants.HTTP_STATUS_SUCCESS != response.getStatusLine().getStatusCode()) {
+			throw new Exception("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+		}
+		BufferedReader rd = new BufferedReader(
+				new InputStreamReader(response.getEntity().getContent()));
+
+			StringBuffer result = new StringBuffer();
+			String line = "";
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+		return result.toString();
+	}
+
+	public  static String callToAPIByPost(String baseAPIUrl, String authHeader, String requestBody) throws Exception {
 		 try {
 
 				DefaultHttpClient httpClient = new DefaultHttpClient();
-				HttpPost postRequest = new HttpPost(BaseAPIUrl);
+				HttpPost postRequest = new HttpPost(baseAPIUrl);
 
 				StringEntity input = new StringEntity(requestBody);
 				input.setContentType("application/json");
 				postRequest.setEntity(input);
+				
+				if(null!=authHeader){
+					postRequest.addHeader("Authorization", authHeader);
+				}
 
 				HttpResponse response = httpClient.execute(postRequest);
-
-				if (Constants.HTTP_STATUS_SUCCESS != response.getStatusLine().getStatusCode()) {
-					throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
-				}
 				
-				return response.getEntity().getContent().toString();
+				return processApiResponse(response);
 
 			  } catch (MalformedURLException e) {
 
-				e.printStackTrace();
+				  throw new Exception(e);
 			
 			  } catch (IOException e) {
 
-				e.printStackTrace();
+				  throw new Exception(e);
 
 			  }
 
-		 	return null;
 	}
 
 }
