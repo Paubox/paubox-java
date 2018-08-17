@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import com.paubox.common.Constants;
 
-public class ConfigarationManeger {
+public class ConfigurationManager {
 	
 	private static void readProperties(String fileAndPath){
 		try {
@@ -37,10 +37,5 @@ public class ConfigarationManeger {
 	public static void getProperties(String fileAndPath){
 		readProperties(fileAndPath);
 	}
-	
-	/*public static void main(String[] args) {
-		ConfigarationManeger con = new ConfigarationManeger();
-		con.readProperties();
-	}*/
 
 }

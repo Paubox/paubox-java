@@ -43,7 +43,7 @@ public class EmailService implements EmailInterface {
 		return response;
 	}
 
-	public SendMessageResponse sendMessage(Message message) throws Exception {
+	public SendMessageResponse SendMessage(Message message) throws Exception {
 		ObjectMapper mapper= new ObjectMapper();
 		String reqBody = formatMessage(message);
 		System.out.println(reqBody);

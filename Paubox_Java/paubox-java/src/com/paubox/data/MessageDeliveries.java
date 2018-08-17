@@ -3,10 +3,6 @@
  */
 package com.paubox.data;
 
-/**
- * @author Vaibhavi
- *
- */
 public class MessageDeliveries {
 
 	private String recipient ;

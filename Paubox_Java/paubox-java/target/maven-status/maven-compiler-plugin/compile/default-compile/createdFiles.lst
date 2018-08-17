@@ -2,7 +2,6 @@ com\paubox\data\MessageDetails.class
 com\paubox\service\EmailInterface.class
 com\paubox\data\Header.class
 com\paubox\service\APIHelper.class
-com\paubox\config\ConfigarationManeger.class
 com\paubox\data\Content.class
 com\paubox\data\Message.class
 com\paubox\data\GetEmailDispositionResponse.class
@@ -13,3 +12,4 @@ com\paubox\data\MessageStatus.class
 com\paubox\service\EmailService.class
 com\paubox\data\SendMessageResponse.class
 com\paubox\common\Constants.class
+com\paubox\config\ConfigurationManager.class

@@ -5,10 +5,6 @@ package com.paubox.data;
 
 import java.util.List;
 
-/**
- * @author Vaibhavi
- *
- */
 public class MessageDetails {
 
 	 private String id;

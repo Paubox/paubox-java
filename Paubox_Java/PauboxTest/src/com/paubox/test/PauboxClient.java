@@ -3,12 +3,13 @@ package com.paubox.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.paubox.config.ConfigarationManeger;
+import com.paubox.config.ConfigurationManager;
 import com.paubox.data.Attachment;
 import com.paubox.data.Content;
 import com.paubox.data.Header;
 import com.paubox.data.Message;
 import com.paubox.data.SendMessageResponse;
+import com.paubox.data.GetEmailDispositionResponse;
 import com.paubox.service.EmailInterface;
 import com.paubox.service.EmailService;
 
@@ -17,7 +18,7 @@ public class PauboxClient {
 	static Message getMessage()
     {
         Message message = new Message();
-        message.setRecipients(new String[] { "vighneshtrivedi2004@gmail.com" });
+        message.setRecipients(new String[] { "username@domain.com" });
 
         Content content = new Content();
         Header header = new Header();
@@ -43,14 +44,12 @@ public class PauboxClient {
     }
 	
 	public static void main(String[] args) {
-		ConfigarationManeger.getProperties("E:\\WORK\\GIT\\paubox-java\\Paubox_Java\\PauboxTest\\src\\resources\\config.properties");
+		ConfigurationManager.getProperties("E:\\WORK\\GIT\\paubox-java\\Paubox_Java\\PauboxTest\\src\\resources\\config.properties");
 		EmailInterface email = new EmailService();
-		try {
-			/*GetEmailDispositionResponse response = email.GetEmailDisposition("97b18032-59d5-47c7-a7c6-a2ed27f0f44e");
-			System.out.println("sysout:" + response.toString());*/
-			
-			SendMessageResponse responseMsg = email.sendMessage(getMessage());
+		try {								
+			SendMessageResponse responseMsg = email.SendMessage(getMessage());
 			System.out.println("SourceTrackingId:" + responseMsg.getSourceTrackingId());
+			GetEmailDispositionResponse response = email.GetEmailDisposition(responseMsg.getSourceTrackingId());			
 			
 		} catch (Exception e) {
 			e.printStackTrace();

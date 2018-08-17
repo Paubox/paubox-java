@@ -6,12 +6,12 @@ E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\Attachment.j
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\MessageData.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\GetEmailDispositionResponse.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\MessageDeliveries.java
-E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\config\ConfigarationManeger.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\service\EmailService.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\SendMessageResponse.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\Content.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\common\Constants.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\Message.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\test\TestEmailService.java
+E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\config\ConfigurationManager.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\service\EmailInterface.java
 E:\WORK\GIT\paubox-java\Paubox_Java\paubox-java\src\com\paubox\data\MessageDetails.java

@@ -5,16 +5,12 @@ package com.paubox.data;
 
 import java.sql.Timestamp;
 
-/**
- * @author Vaibhavi
- *
- */
 public class MessageStatus {
 	
-	 private String deliveryStatus ;
-	 private Timestamp deliveryTime ;
-	 private String openedStatus ;        
-	 private Timestamp openedTime ;
+	 private String deliveryStatus;
+	 private Timestamp deliveryTime;
+	 private String openedStatus;        
+	 private Timestamp openedTime;
 	/**
 	 * @return the deliveryStatus
 	 */

@@ -3,10 +3,6 @@
  */
 package com.paubox.data;
 
-/**
- * @author Vaibhavi
- *
- */
 public class MessageData {
 
 	 private MessageDetails message;

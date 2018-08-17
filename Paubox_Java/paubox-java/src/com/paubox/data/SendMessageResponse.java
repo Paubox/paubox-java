@@ -4,9 +4,9 @@ import java.util.List;
 
 public class SendMessageResponse {
 
-	private String sourceTrackingId ;
-    private String data ;
-    private List<Error> errors ;
+	private String sourceTrackingId;
+    private String data;
+    private List<Error> errors;
 	/**
 	 * @return the sourceTrackingId
 	 */
