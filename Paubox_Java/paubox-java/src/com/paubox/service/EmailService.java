@@ -12,6 +12,8 @@ import com.paubox.data.GetEmailDispositionResponse;
 import com.paubox.data.Message;
 import com.paubox.data.MessageDeliveries;
 import com.paubox.data.SendMessageResponse;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 public class EmailService implements EmailInterface {
 
@@ -43,9 +45,9 @@ public class EmailService implements EmailInterface {
 
 	public SendMessageResponse sendMessage(Message message) throws Exception {
 		ObjectMapper mapper= new ObjectMapper();
-		String reqBody=formatMessage(message);
+		String reqBody = formatMessage(message);
 		System.out.println(reqBody);
-		String url=baseApiUrl+"messages";
+		String url = baseApiUrl + "messages";
 		String responseStr = APIHelper.callToAPIByPost(url, getAuthorizationHeader(), reqBody);
 		SendMessageResponse response = (SendMessageResponse) mapper.readValue(responseStr,
 				SendMessageResponse.class);
@@ -53,20 +55,21 @@ public class EmailService implements EmailInterface {
 	}
 	
 	private String formatMessage(Message message) throws Exception{
-		
-		
-		Message messageJSON= new Message();
-		
-		Map<String,String> hearderMap=new HashMap<String,String>();
-		Map<String,String> contentMap=new HashMap<String,String>();
+						
+		JSONObject messageJSON = new JSONObject();		
+		JSONObject contentJSON = null;
+		JSONObject headerJSON = null;
+		JSONObject attachmentJSON = null;		
+        JSONObject requestJSON = new JSONObject();
+        JSONObject dataJSON = new JSONObject();
+        JSONArray attachmentJSONArray = new JSONArray();
 		
 		if (message.getHeader() != null) {
 			
-			hearderMap.put("subject" , message.getHeader().getSubject());
-			hearderMap.put("from" , message.getHeader().getFrom());
-			hearderMap.put("reply-to" , message.getHeader().getReplyTo());
-			messageJSON.setHearderMap(hearderMap);
-			
+			headerJSON = new JSONObject();
+			headerJSON.put("subject" , message.getHeader().getSubject());
+			headerJSON.put("from" , message.getHeader().getFrom());
+			headerJSON.put("reply-to" , message.getHeader().getReplyTo());						
         }
         else {
             throw new Exception("Message Header cannot be null.");
@@ -74,27 +77,39 @@ public class EmailService implements EmailInterface {
 		
 		if (message.getContent() != null){
 			
-			contentMap.put("text/plain" , message.getContent().getPlainText());
-			contentMap.put("text/html" , message.getContent().getHtmlText());
-			messageJSON.setContentMap(contentMap);
+			contentJSON = new JSONObject();
+			contentJSON.put("text/plain" , message.getContent().getPlainText());
+			contentJSON.put("text/html" , message.getContent().getHtmlText());			
 			
         } else {
             throw new Exception("Message Content cannot be null.");
         }
 		
 		  //If there are attachments, then prepare attachment array JSON
-        if (message.getAttachments() != null && message.getAttachments().size() > 0) {
-        	messageJSON.setAttachments(message.getAttachments());
-            
+        if (message.getAttachments() != null && message.getAttachments().size() > 0) {        	           
+            for (Attachment attachment : message.getAttachments())
+            {
+            	attachmentJSON = new JSONObject();
+            	attachmentJSON.put("fileName" , attachment.getFileName());
+            	attachmentJSON.put("contentType" , attachment.getContentType());
+            	attachmentJSON.put("content" , attachment.getContent());
+    			    			               
+            	attachmentJSONArray.add(attachmentJSON);
+            }        	
         }
         
-        messageJSON.setBcc(message.getBcc());
-        messageJSON.setRecipients(message.getRecipients());
-        messageJSON.setAllowNonTLS(message.isAllowNonTLS());
+        messageJSON.put("bcc",message.getBcc());                                
+        messageJSON.put("recipients",message.getRecipients());        
+        messageJSON.put("headers",headerJSON);        
+        messageJSON.put("allowNonTLS",message.isAllowNonTLS());
+        messageJSON.put("content",contentJSON);
+        messageJSON.put("attachments",attachmentJSONArray);
         
-        ObjectMapper mapper = new ObjectMapper();
-		
-		return mapper.writeValueAsString(messageJSON);
+        dataJSON.put("message",messageJSON);
+        requestJSON.put("data",dataJSON);
+        
+        ObjectMapper mapper = new ObjectMapper();		
+		return mapper.writeValueAsString(requestJSON);
 	}
 
 	private static String getAuthorizationHeader() {

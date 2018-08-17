@@ -8,12 +8,10 @@ public class Message {
 	
 	private String[] recipients ;
     private String[] bcc ;
-      private Header header ;
-      private boolean allowNonTLS  = false;
-      private Content content ;
-      private List<Attachment> attachments ;
-      private Map<String,String> hearderMap=new HashMap<String,String>();
-      private  Map<String,String> contentMap=new HashMap<String,String>();
+    private Header header;
+    private boolean allowNonTLS  = false;
+    private Content content ;
+    private List<Attachment> attachments ;      
 	/**
 	 * @return the recipients
 	 */
@@ -85,32 +83,6 @@ public class Message {
 	 */
 	public void setAttachments(List<Attachment> attachments) {
 		this.attachments = attachments;
-	}
-	/**
-	 * @return the hearderMap
-	 */
-	public Map<String, String> getHearderMap() {
-		return hearderMap;
-	}
-	/**
-	 * @param hearderMap the hearderMap to set
-	 */
-	public void setHearderMap(Map<String, String> hearderMap) {
-		this.hearderMap = hearderMap;
-	}
-	/**
-	 * @return the contentMap
-	 */
-	public Map<String, String> getContentMap() {
-		return contentMap;
-	}
-	/**
-	 * @param contentMap the contentMap to set
-	 */
-	public void setContentMap(Map<String, String> contentMap) {
-		this.contentMap = contentMap;
-	}
+	}		      
 	
-      
-
 }
