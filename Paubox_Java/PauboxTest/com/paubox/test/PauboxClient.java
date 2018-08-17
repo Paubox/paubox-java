@@ -6,10 +6,10 @@ import java.util.List;
 import com.paubox.config.ConfigurationManager;
 import com.paubox.data.Attachment;
 import com.paubox.data.Content;
+import com.paubox.data.GetEmailDispositionResponse;
 import com.paubox.data.Header;
 import com.paubox.data.Message;
 import com.paubox.data.SendMessageResponse;
-import com.paubox.data.GetEmailDispositionResponse;
 import com.paubox.service.EmailInterface;
 import com.paubox.service.EmailService;
 

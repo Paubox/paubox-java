@@ -5,17 +5,19 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.paubox.config.ConfigarationManeger;
+import com.paubox.config.ConfigurationManager;
 import com.paubox.data.GetEmailDispositionResponse;
 import com.paubox.service.EmailInterface;
 import com.paubox.service.EmailService;
+
+
 
 public class TestEmailService {
 	EmailInterface email = new EmailService();
 	
 	@BeforeClass
 	public static void  init(){
-		ConfigarationManeger.getProperties("D:/Projects/paubox-java/paubox-java/Paubox_Java/PauboxTest/src/resources/config.properties");
+		ConfigurationManager.getProperties("D:/Projects/paubox-java/paubox-java/Paubox_Java/PauboxTest/src/resources/config.properties");
 	}
 	
 	@Test
