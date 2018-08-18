@@ -17,7 +17,7 @@ public class EmailService implements EmailInterface {
 
 	private String baseApiUrl = "https://api.paubox.net/v1/" + Constants.API_USER + "/";
 
-	public GetEmailDispositionResponse GetEmailDisposition(String sourceTrackingId) throws Exception {
+	public GetEmailDispositionResponse getEmailDisposition(String sourceTrackingId) throws Exception {
 		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId;
 		String responseStr = APIHelper.callToAPIByGet(url, getAuthorizationHeader());
 		ObjectMapper mapper = new ObjectMapper();
@@ -42,16 +42,15 @@ public class EmailService implements EmailInterface {
 		return response;
 	}
 
-	public SendMessageResponse SendMessage(Message message) throws Exception {
+	public SendMessageResponse sendMessage(Message message) throws Exception {
 		ObjectMapper mapper= new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		String reqBody = formatMessage(message);
-		System.out.println(reqBody);
 		String url = baseApiUrl + "messages";
 		String responseStr = APIHelper.callToAPIByPost(url, getAuthorizationHeader(), reqBody);
 		SendMessageResponse response = (SendMessageResponse) mapper.readValue(responseStr,
 				SendMessageResponse.class);
-		if (response.getData() == null && response.getSourceTrackingId() == null && response.getErrors() == null)
+		if (null == response.getData() && null == response.getSourceTrackingId() && null == response.getErrors())
         {
             throw new IOException(responseStr);
         }

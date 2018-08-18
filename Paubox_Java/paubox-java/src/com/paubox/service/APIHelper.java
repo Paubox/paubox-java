@@ -12,10 +12,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import com.paubox.common.Constants;
-
 public class APIHelper {
 	
+	/**
+	 * Call http get API
+	 * @param baseAPIUrl String
+	 * @param authHeader String
+	 * @return String
+	 * @throws Exception
+	 */
 	public static String callToAPIByGet(String baseAPIUrl, String authHeader) throws Exception {
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -41,6 +46,7 @@ public class APIHelper {
 	}
 
 	/**
+	 * process the response of API 
 	 * @param response
 	 * @return
 	 * @throws Exception 
@@ -59,8 +65,12 @@ public class APIHelper {
 	}
 	
 /**
- * @param
- * 
+ * Call http POST API
+ * @param baseAPIUrl String
+ * @param authHeader String
+ * @param requestBody String
+ * @return String
+ * @throws Exception
  */
 	public  static String callToAPIByPost(String baseAPIUrl, String authHeader, String requestBody) throws Exception {
 		 try {

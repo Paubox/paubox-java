@@ -1,4 +1,4 @@
-package paubox.test;
+package com.paubox.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class PauboxClient {
         Attachment attachment = new Attachment();
         List<Attachment> listAttachments = new ArrayList<Attachment>();
         attachment.setFileName("hello_world.txt");
-        attachment.setContentType("text/plain");
+        attachment.setContentType("text/html");
         attachment.setContent("SGVsbG8gV29ybGQh\n");
 
         listAttachments.add(attachment);
@@ -44,12 +44,12 @@ public class PauboxClient {
     }
 	
 	public static void main(String[] args) {
-		ConfigurationManager.getProperties("E:\\WORK\\GIT\\paubox-java\\Paubox_Java\\PauboxTest\\src\\resources\\config.properties");
+		ConfigurationManager.getProperties("E:\\projects\\paubox-java\\Paubox_Java\\PauboxTest\\src\\resources\\config.properties");
 		EmailInterface email = new EmailService();
 		try {								
 			SendMessageResponse responseMsg = email.SendMessage(getMessage());
 			System.out.println("SourceTrackingId:" + responseMsg.getSourceTrackingId());
-			GetEmailDispositionResponse response = email.GetEmailDisposition(responseMsg.getSourceTrackingId());
+			//GetEmailDispositionResponse response = email.GetEmailDisposition(responseMsg.getSourceTrackingId());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

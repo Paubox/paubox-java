@@ -43,6 +43,14 @@ public class SendMessageResponse {
 	public void setErrors(List<Error> errors) {
 		this.errors = errors;
 	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "SendMessageResponse [sourceTrackingId=" + sourceTrackingId + ", data=" + data + ", errors=" + errors
+				+ "]";
+	}
     
     
 }
