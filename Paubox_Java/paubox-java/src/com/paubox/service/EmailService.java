@@ -1,10 +1,8 @@
 package com.paubox.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paubox.common.Constants;
 import com.paubox.data.Attachment;
@@ -20,14 +18,15 @@ public class EmailService implements EmailInterface {
 	private String baseApiUrl = "https://api.paubox.net/v1/" + Constants.API_USER + "/";
 
 	public GetEmailDispositionResponse GetEmailDisposition(String sourceTrackingId) throws Exception {
-		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId ;
+		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId;
 		String responseStr = APIHelper.callToAPIByGet(url, getAuthorizationHeader());
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		GetEmailDispositionResponse response = (GetEmailDispositionResponse) mapper.readValue(responseStr,
 				GetEmailDispositionResponse.class);
 		 if (response.getData() == null && response.getSourceTrackingId() == null && response.getErrors() == null)
          {
-             throw new Exception("Error while getting the response.");
+			 throw new IOException(responseStr);
          }
 
          if (response != null && response.getData() != null && response.getData().getMessage() != null
@@ -45,12 +44,17 @@ public class EmailService implements EmailInterface {
 
 	public SendMessageResponse SendMessage(Message message) throws Exception {
 		ObjectMapper mapper= new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		String reqBody = formatMessage(message);
 		System.out.println(reqBody);
 		String url = baseApiUrl + "messages";
 		String responseStr = APIHelper.callToAPIByPost(url, getAuthorizationHeader(), reqBody);
 		SendMessageResponse response = (SendMessageResponse) mapper.readValue(responseStr,
 				SendMessageResponse.class);
+		if (response.getData() == null && response.getSourceTrackingId() == null && response.getErrors() == null)
+        {
+            throw new IOException(responseStr);
+        }
 		return response;
 	}
 	

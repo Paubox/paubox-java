@@ -20,20 +20,16 @@ public class APIHelper {
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			
-			HttpGet getRequest = new HttpGet(baseAPIUrl);
-			
+			HttpGet getRequest = new HttpGet(baseAPIUrl);			
 			getRequest.addHeader("accept", "application/json");
 			
 			if(null!=authHeader){
 				getRequest.addHeader("Authorization", authHeader);
-			}
+			}				
 
 			HttpResponse response = httpClient.execute(getRequest);
-
-			return processApiResponse(response);
-				
-			 
-
+			return processApiResponse(response);					
+			
 		} catch (ClientProtocolException e) {
 
 			throw new Exception(e);
@@ -50,10 +46,7 @@ public class APIHelper {
 	 * @throws Exception 
 	 */
 	private static String processApiResponse(HttpResponse response) throws Exception {
-		
-		if (Constants.HTTP_STATUS_SUCCESS != response.getStatusLine().getStatusCode()) {
-			throw new Exception("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
-		}
+				
 		BufferedReader rd = new BufferedReader(
 				new InputStreamReader(response.getEntity().getContent()));
 

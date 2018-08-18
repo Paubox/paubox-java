@@ -1,4 +1,4 @@
-package com.paubox.test;
+package paubox.test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class PauboxClient {
 		try {								
 			SendMessageResponse responseMsg = email.SendMessage(getMessage());
 			System.out.println("SourceTrackingId:" + responseMsg.getSourceTrackingId());
-			GetEmailDispositionResponse response = email.GetEmailDisposition(responseMsg.getSourceTrackingId());			
+			GetEmailDispositionResponse response = email.GetEmailDisposition(responseMsg.getSourceTrackingId());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -6,7 +6,7 @@ public class GetEmailDispositionResponse {
 
 	 private String sourceTrackingId ;
 	 private MessageData data;
-     private List<String> errors;
+     private List<Error> errors;
 	/**
 	 * @return the sourceTrackingId
 	 */
@@ -22,13 +22,13 @@ public class GetEmailDispositionResponse {
 	/**
 	 * @return the errors
 	 */
-	public List<String> getErrors() {
+	public List<Error> getErrors() {
 		return errors;
 	}
 	/**
 	 * @param errors the errors to set
 	 */
-	public void setErrors(List<String> errors) {
+	public void setErrors(List<Error> errors) {
 		this.errors = errors;
 	}
 	/* (non-Javadoc)
