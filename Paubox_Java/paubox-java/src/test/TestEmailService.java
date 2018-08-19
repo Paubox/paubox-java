@@ -34,7 +34,7 @@ public class TestEmailService {
 	@Before
 	public void getMessage()
     {
-        message.setRecipients(new String[] { "dave.vaibhavi@gmail.com","vighneshtrivedi2004@gmail.com" });
+        message.setRecipients(new String[] { "vighneshtrivedi2004@gmail.com" });
 
         Content content = new Content();
         Header header = new Header();
