@@ -97,6 +97,43 @@ static SendMessageResponse SendNonTLSMessage()
 }
 ```
 
+### Adding Attachments
+
+
+```java
+static SendMessageResponse SendMessage()
+{
+ Message message = new Message();
+ Content content = new Content();
+ Header header = new Header();
+ message.setRecipients(new String[] { "someone@domain.com",
+ “someoneelse@domain.com“ });
+ header.setFrom("you@yourdomain.com");
+ message.setBcc(new String[] { "bcc-recipient@domain.com" });
+ header.setSubject("Testing!");
+ header.setReplyTo("reply-to@yourdomain.com");
+ content.setPlainText("Hello World!");
+ message.setHeader(header);
+ message.setContent(content);
+ 
+ // Base64 encode attachment contents and use a valid content type.
+ Attachment attachment = new Attachment();
+ List<Attachment> listAttachments = new ArrayList<Attachment>();
+ attachment.setFileName("hello_world.txt");
+ attachment.setContentType("text/plain");
+ attachment.setContent("SGVsbG8gV29ybGQh\n");
+ listAttachments.add(attachment);
+
+ EmailInterface email = new EmailService();
+ SendMessageResponse response = email.SendMessage(message);
+ return response;
+}
+```
+
+```
+
+
+
 ### Checking Email Dispositions
 
 To get email status for any source tracking id call GetEmailDisposition method of EmailService using EmailInterface:
