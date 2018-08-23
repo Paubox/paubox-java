@@ -26,23 +26,24 @@ You can [sign-up for an account here](https://www.paubox.com/solutions/email-api
 
 Include your API credentials in a configuration file.
 
-Create a configuration properties file, and add following 2 properties to this file:
+Create a configuration properties file, and add the following 2 properties to this file:
 
 ```java
 APIKEY: Your-API-Key-Here
 APIUSER: Your-Username-Here
 ```
 
-Give path to this configuration file as input to ConfigurationManager.getProperties()
+Give the path to this configuration file as input to ConfigurationManager.getProperties()
 method. e.g.
-ConfigurationManager.getProperties("E:\\projects\\PauboxTest\\src\\resources\\confi
-g.properties");
+```java
+ConfigurationManager.getProperties("E:\\projects\\PauboxTest\\src\\resources\\config.properties");
+```
 
 <a name="#usage"></a>
 ## Usage
 
-To send email, prepare a Message object and call SendMessage method of
-EmailService using EmailInterface: 
+To send email, prepare a Message object and call the SendMessage method of
+EmailService using EmailInterface:
 
 ### Sending messages
 
@@ -72,7 +73,7 @@ static SendMessageResponse SendMessage()
 
 If you want to send non-PHI mail that does not need to be HIPAA-compliant, you can allow the message delivery to take place even if a TLS connection is unavailable.
 
-This means a message will not be converted into a secure portal message when a nonTLS connection is encountered. For this, just pass true to message.setAllowNonTLS() method, as shown below:
+This means the message will not be converted into a secure portal message when a nonTLS connection is encountered. To do this, just pass true to message.setAllowNonTLS() method, as shown below:
 
 ```java
 static SendMessageResponse SendNonTLSMessage()
@@ -115,7 +116,7 @@ static SendMessageResponse SendMessage()
  content.setPlainText("Hello World!");
  message.setHeader(header);
  message.setContent(content);
- 
+
  // Base64 encode attachment contents and use a valid content type.
  Attachment attachment = new Attachment();
  List<Attachment> listAttachments = new ArrayList<Attachment>();
@@ -130,13 +131,10 @@ static SendMessageResponse SendMessage()
 }
 ```
 
-```
-
-
 
 ### Checking Email Dispositions
 
-To get email status for any source tracking id call GetEmailDisposition method of EmailService using EmailInterface:
+To check the status for any email, use its source tracking id and call the GetEmailDisposition method of EmailService using EmailInterface:
 
 ```java
 static void GetEmailDisposition()
@@ -150,7 +148,7 @@ email.GetEmailDisposition(“2a3c048485aa4cf6”);
 <a name="#contributing"></a>
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/paubox/paubox_ruby.
+Bug reports and pull requests are welcome on GitHub at https://github.com/paubox/paubox-java.
 
 
 <a name="#license"></a>
@@ -168,6 +166,3 @@ limitations under the License.
 
 ## Copyright
 Copyright &copy; 2018, Paubox Inc.
-
-
-
