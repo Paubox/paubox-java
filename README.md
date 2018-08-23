@@ -140,8 +140,7 @@ To check the status for any email, use its source tracking id and call the GetEm
 static void GetEmailDisposition()
 {
  EmailInterface email = new EmailService();
- GetEmailDispositionResponse response =
-email.GetEmailDisposition(“2a3c048485aa4cf6”);
+ GetEmailDispositionResponse response = email.GetEmailDisposition(“2a3c048485aa4cf6”);
 }
 ```
 
