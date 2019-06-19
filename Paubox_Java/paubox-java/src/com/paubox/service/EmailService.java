@@ -1,7 +1,7 @@
 package com.paubox.service;
 
 import java.io.IOException;
-
+import java.util.Base64;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paubox.common.Constants;
@@ -82,7 +82,8 @@ public class EmailService implements EmailInterface {
 			
 			contentJSON = new JSONObject();
 			contentJSON.put("text/plain" , message.getContent().getPlainText());
-			contentJSON.put("text/html" , message.getContent().getHtmlText());
+			if(message.getContent().getHtmlText() != null)
+				contentJSON.put("text/html",Base64.getEncoder().encodeToString(message.getContent().getHtmlText().getBytes()));
 			
 		} else {
             throw new Exception("Message Content cannot be null.");

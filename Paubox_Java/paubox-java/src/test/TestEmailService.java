@@ -277,6 +277,17 @@ public class TestEmailService {
 		assertNotNull(response.getSourceTrackingId());
 		assertNotNull(response.getData());
 		assertNull(response.getErrors());
-	}		
+	}	
+	
+	@Test
+	public void testSendMessageForBase64Encoding() throws Exception {
+		message.getContent().setPlainText(null);
+		message.getContent().setHtmlText("<html><head></head><body><h1> Hello World! </h1> </body></html>");
+		SendMessageResponse response = email.sendMessage(message);
+		assertNotNull(response);
+		assertNotNull(response.getSourceTrackingId());
+		assertNotNull(response.getData());
+		assertNull(response.getErrors());
+	}
 	
 }
