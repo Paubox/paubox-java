@@ -266,4 +266,45 @@ public class TestEmailService {
 	}
 
 	
+	@Test
+	public void testSendMessageForTrueForceSecureNotification() throws Exception {
+		message.setForceSecureNotification("true");
+		SendMessageResponse response = email.sendMessage(message);
+		assertNotNull(response);
+		assertNotNull(response.getSourceTrackingId());
+		assertNotNull(response.getData());
+		assertNull(response.getErrors());
+	}
+	
+	@Test
+	public void testSendMessageForFalseForceSecureNotification() throws Exception {
+		message.setForceSecureNotification("FALSE");
+		SendMessageResponse response = email.sendMessage(message);
+		assertNotNull(response);
+		assertNotNull(response.getSourceTrackingId());
+		assertNotNull(response.getData());
+		assertNull(response.getErrors());
+	}
+	
+	@Test
+	public void testSendMessageForNullForceSecureNotification() throws Exception {
+		message.setForceSecureNotification(null);
+		SendMessageResponse response = email.sendMessage(message);
+		assertNotNull(response);
+		assertNotNull(response.getSourceTrackingId());
+		assertNotNull(response.getData());
+		assertNull(response.getErrors());
+	}	
+	
+	@Test
+	public void testSendMessageForBase64Encoding() throws Exception {
+		message.getContent().setPlainText(null);
+		message.getContent().setHtmlText("<html><head></head><body><h1> Hello World! </h1> </body></html>");
+		SendMessageResponse response = email.sendMessage(message);
+		assertNotNull(response);
+		assertNotNull(response.getSourceTrackingId());
+		assertNotNull(response.getData());
+		assertNull(response.getErrors());
+	}
+	
 }

@@ -11,6 +11,7 @@ public class Message {
     private String[] cc ;
     private Header header;
     private boolean allowNonTLS  = false;    
+    private String forceSecureNotification;
     private Content content ;
     private List<Attachment> attachments ;      
 	/**
@@ -37,6 +38,7 @@ public class Message {
 	public void setBcc(String[] bcc) {
 		this.bcc = bcc;
 	}
+	
 	/**
 	 *  @return the cc
 	 */
@@ -74,6 +76,20 @@ public class Message {
 	public void setAllowNonTLS(boolean allowNonTLS) {
 		this.allowNonTLS = allowNonTLS;
 	}	
+	/**
+	 * 
+	 * @return the forceSecureNotification
+	 */
+	public String getForceSecureNotification() {
+		return forceSecureNotification;
+	}
+	/**
+	 * 
+	 * @param forceSecureNotification the forceSecureNotification to set
+	 */
+	public void setForceSecureNotification(String forceSecureNotification) {
+		this.forceSecureNotification = forceSecureNotification;
+	}
 	/**
 	 * @return the content
 	 */
