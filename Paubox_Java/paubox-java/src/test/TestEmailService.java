@@ -34,7 +34,7 @@ public class TestEmailService {
 	@Before
 	public void getMessage()
     {
-        message.setRecipients(new String[] { "vighneshtrivedi2004@gmail.com" });
+        message.setRecipients(new String[] { "test@test.com" });
 
         Content content = new Content();
         Header header = new Header();
@@ -123,7 +123,8 @@ public class TestEmailService {
 	@Test
 	public void testSendMessageForOptionalValue() {
 		try {
-			message.setBcc(null);			
+			message.setBcc(null);
+			message.setCc(null);
 			message.setAttachments(null);
 			SendMessageResponse response = email.sendMessage(message);
 			assertNotNull(response);
@@ -247,7 +248,23 @@ public class TestEmailService {
 	public void testSendMessageForHeader() throws Exception {
 		message.setHeader(null);
 		SendMessageResponse response = email.sendMessage(message);
+	}	
+	
+	@Test
+	public void testSendMessageForCCValue() {
+		try {
+			message.setCc(new String[] { "test_cc@test.com" });
+			SendMessageResponse response = email.sendMessage(message);
+			assertNotNull(response);
+			assertNotNull(response.getSourceTrackingId());
+			assertNotNull(response.getData());
+			assertNull(response.getErrors());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
+
 	
 	@Test
 	public void testSendMessageForTrueForceSecureNotification() throws Exception {

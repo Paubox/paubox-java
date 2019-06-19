@@ -101,8 +101,9 @@ public class EmailService implements EmailInterface {
             	attachmentJSONArray.add(attachmentJSON);
             }        	
         }
-        
-        messageJSON.put("bcc",message.getBcc());        
+
+        messageJSON.put("bcc",message.getBcc()); 
+        messageJSON.put("cc",message.getCc());
         messageJSON.put("recipients",message.getRecipients());        
         messageJSON.put("headers",headerJSON);        
         messageJSON.put("allowNonTLS",message.isAllowNonTLS());

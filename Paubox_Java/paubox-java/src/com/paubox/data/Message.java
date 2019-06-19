@@ -7,9 +7,10 @@ import java.util.Map;
 public class Message {
 	
 	private String[] recipients ;
-    private String[] bcc ;    
+    private String[] bcc ;
+    private String[] cc ;
     private Header header;
-    private boolean allowNonTLS  = false;
+    private boolean allowNonTLS  = false;    
     private String forceSecureNotification;
     private Content content ;
     private List<Attachment> attachments ;      
@@ -39,6 +40,19 @@ public class Message {
 	}
 	
 	/**
+	 *  @return the cc
+	 */
+	public String[] getCc() {
+		return cc;
+	}
+	/**
+	 * 
+	 * @param cc the cc to set
+	 */
+	public void setCc(String[] cc) {
+		this.cc = cc;
+	}
+	/**
 	 * @return the header
 	 */
 	public Header getHeader() {
@@ -61,7 +75,7 @@ public class Message {
 	 */
 	public void setAllowNonTLS(boolean allowNonTLS) {
 		this.allowNonTLS = allowNonTLS;
-	}
+	}	
 	/**
 	 * 
 	 * @return the forceSecureNotification
