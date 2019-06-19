@@ -100,6 +100,35 @@ static SendMessageResponse SendNonTLSMessage()
 }
 ```
 
+### Forcing Secure Notifications
+
+Paubox Secure Notifications allow an extra layer of security, especially when coupled with an organization's requirement for message recipients to use 2-factor authentication to read messages (this setting is available to org administrators in the Paubox Admin Panel).
+
+Instead of receiving an email with the message contents, the recipient will receive a notification email that they have a new message in Paubox.
+
+```java
+static SendMessageResponse SendForceSecureNotificationMessage()
+{
+ Message message = new Message();
+ Content content = new Content();
+ Header header = new Header();
+ message.setRecipients(new String[] { "someone@domain.com",
+ “someoneelse@domain.com“ });
+ header.setFrom("you@yourdomain.com");
+ message.setBcc(new String[] { "bcc-recipient@domain.com" });
+ header.setSubject("Testing!");
+ header.setReplyTo("reply-to@yourdomain.com");
+ content.setPlainText("Hello World!");
+ message.setForceSecureNotification("true");
+ message.setHeader(header);
+ message.setContent(content);
+
+ EmailInterface email = new EmailService();
+ SendMessageResponse response = email.SendMessage(message);
+ return response;
+}
+```
+
 ### Adding Attachments
 
 
