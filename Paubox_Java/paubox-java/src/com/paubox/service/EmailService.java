@@ -82,9 +82,9 @@ public class EmailService implements EmailInterface {
 			
 			contentJSON = new JSONObject();
 			contentJSON.put("text/plain" , message.getContent().getPlainText());
-			contentJSON.put("text/html" , message.getContent().getHtmlText());			
+			contentJSON.put("text/html" , message.getContent().getHtmlText());
 			
-        } else {
+		} else {
             throw new Exception("Message Content cannot be null.");
         }
 		
@@ -101,13 +101,19 @@ public class EmailService implements EmailInterface {
             }        	
         }
         
-        messageJSON.put("bcc",message.getBcc());                                
+        messageJSON.put("bcc",message.getBcc());        
         messageJSON.put("recipients",message.getRecipients());        
         messageJSON.put("headers",headerJSON);        
         messageJSON.put("allowNonTLS",message.isAllowNonTLS());
+        String forceSecureNotification = message.getForceSecureNotification();
+        if(forceSecureNotification != null && !forceSecureNotification.isEmpty()){
+        	if(forceSecureNotification.equalsIgnoreCase("true"))
+        		messageJSON.put("forceSecureNotification",true);
+        	else if(forceSecureNotification.equalsIgnoreCase("false"))
+        		messageJSON.put("forceSecureNotification",false);
+        }
         messageJSON.put("content",contentJSON);
         messageJSON.put("attachments",attachmentJSONArray);
-        
         dataJSON.put("message",messageJSON);
         requestJSON.put("data",dataJSON);
         
