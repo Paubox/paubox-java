@@ -2,3 +2,6 @@
 *.prefs
 *.class
 *.class
+*.classpath
+*.project
+bin/
