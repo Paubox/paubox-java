@@ -5,3 +5,5 @@
 *.classpath
 *.project
 bin/
+target/
+config.properties
