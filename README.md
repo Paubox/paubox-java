@@ -2,9 +2,9 @@
 
 # Paubox Java
 
-This is the official Java wrapper for the [Paubox Transactional Email API](https://www.paubox.com/solutions/email-api). It is currently in alpha development.
+This is the official Java wrapper for the [Paubox Email API](https://www.paubox.com/solutions/email-api). 
 
-The Paubox Transactional Email API allows your application to send secure, HIPAA-compliant email via Paubox and track deliveries and opens.
+The Paubox Email API allows your application to send secure, HIPAA compliant email via Paubox and track deliveries and opens.
 The API wrapper allows you to construct and send messages.
 
 # Table of Contents
@@ -196,4 +196,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ## Copyright
-Copyright &copy; 2019, Paubox Inc.
+Copyright &copy; 2020, Paubox Inc.
