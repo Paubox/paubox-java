@@ -56,7 +56,7 @@ static SendMessageResponse SendMessage()
  Content content = new Content();
  Header header = new Header();
  message.setRecipients(new String[] { "someone@domain.com",
- “someoneelse@domain.com“ });
+ "someoneelse@domain.com" });
  header.setFrom("you@yourdomain.com");
  message.setCc(new String[] { "cc-recipient@domain.com" });
  message.setBcc(new String[] { "bcc-recipient@domain.com" });
