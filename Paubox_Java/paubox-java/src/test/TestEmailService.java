@@ -140,7 +140,7 @@ public class TestEmailService {
 	@Test
 	public void testSendMessageForErrorMail() {
 		try {
-			message.getHeader().setFrom("renee@undefeatedgames1.com");
+            message.setRecipients(new String[] { "bogus@undefeatedgames123.@com" });
 			SendMessageResponse response = email.sendMessage(message);
 			assertNotNull(response);
 			assertNull(response.getSourceTrackingId());
