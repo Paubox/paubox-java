@@ -132,6 +132,9 @@ static SendMessageResponse SendForceSecureNotificationMessage()
 
 ### Adding Attachments
 
+#### Plain text Attachments
+
+Below is some sample code to send a plain text attachment.
 
 ```java
 static SendMessageResponse SendMessage()
@@ -155,6 +158,51 @@ static SendMessageResponse SendMessage()
  attachment.setFileName("hello_world.txt");
  attachment.setContentType("text/plain");
  attachment.setContent("SGVsbG8gV29ybGQh\n");
+ listAttachments.add(attachment);
+
+ EmailInterface email = new EmailService();
+ SendMessageResponse response = email.SendMessage(message);
+ return response;
+}
+```
+
+#### PDF Attachments
+Provided below is some sample code to send an email with a PDF attachment, with slight modification this code will also work for any other type of file attachment which includes binary data.
+
+Two things to be noted here are ...
+- The contentType specified needs to match the file type, please refer to this link for a list of [content type](https://cloud.google.com/appengine/docs/standard/php/mail/mail-with-headers-attachments) values.
+- The attachment content needs to be read from the file in bytes and then converted to a base64 encoded string before calling Attachment.setContent(), the conversion to base64 is the responsibility of the user.
+
+```java
+static SendMessageResponse SendMessage()
+{
+ Message message = new Message();
+ Content content = new Content();
+ Header header = new Header();
+ message.setRecipients(new String[] { "someone@domain.com",
+ “someoneelse@domain.com“ });
+ header.setFrom("you@yourdomain.com");
+ message.setBcc(new String[] { "bcc-recipient@domain.com" });
+ header.setSubject("Testing!");
+ header.setReplyTo("reply-to@yourdomain.com");
+ content.setPlainText("Hello World!");
+ message.setHeader(header);
+ message.setContent(content);
+
+ // Base64 encode attachment contents and use a valid content type.
+ Attachment attachment = new Attachment();
+ List<Attachment> listAttachments = new ArrayList<Attachment>();
+
+ attachment.setFileName("testFile.pdf");
+ attachment.setContentType("application/pdf");
+
+ byte[] input_file = Files.readAllBytes(Paths.get("testFile.pdf"));
+ byte[] encodedBytes = Base64.getEncoder().encode(input_file);
+
+ String pdfInBase64 = new String(encodedBytes);
+
+ attachment.setContent(pdfInBase64);
+ 
  listAttachments.add(attachment);
 
  EmailInterface email = new EmailService();
