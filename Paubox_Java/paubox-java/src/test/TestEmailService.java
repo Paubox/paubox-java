@@ -215,6 +215,39 @@ public class TestEmailService {
 		}
 
 	}
+
+
+	@Test
+	public void testSendMessageForPDFAttachment() {
+		try {
+			message.setAttachments(null);
+			Attachment attachment = new Attachment();
+			List<Attachment> listAttachments = new ArrayList<Attachment>();
+			attachment.setFileName("testFile.pdf");
+			attachment.setContentType("application/pdf");
+
+			byte[] input_file = Files.readAllBytes(Paths.get("src/test/testFile.pdf"));
+			byte[] encodedBytes = Base64.getEncoder().encode(input_file);
+
+			String pdfInBase64 = new String(encodedBytes);
+
+			attachment.setContent(pdfInBase64);
+
+			listAttachments.add(attachment);
+			message.getContent().setPlainText(null);
+			message.getContent().setHtmlText("text/html");
+			message.setAttachments(listAttachments);
+			SendMessageResponse response1 = email.sendMessage(message);
+			assertNotNull(response1);
+			assertNotNull(response1.getSourceTrackingId());
+			assertNotNull(response1.getData());
+			assertNull(response1.getErrors());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
 	
 	@Test(expected=IOException.class)
 	public void testSendMessageForNoRecipients() throws Exception {

@@ -7,3 +7,5 @@
 bin/
 target/
 config.properties
+*.swp
+*.swp
