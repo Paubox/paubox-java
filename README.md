@@ -167,7 +167,7 @@ static SendMessageResponse SendMessage()
 ```
 
 #### PDF Attachments
-Provided below is some sample code to send an email with a PDF attachment, with slight modification this code will also work for any other type of file attachment which includes binary data.
+Provided below is some sample code to send an email with a PDF attachment, with slight modification this code will also work for any other type of file attachment which contains binary data.
 
 Two things to be noted here are ...
 - The contentType specified needs to match the file type, please refer to this link for a list of [content type](https://cloud.google.com/appengine/docs/standard/php/mail/mail-with-headers-attachments) values.
