@@ -7,6 +7,10 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.nio.file.Files;
+
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,11 +28,19 @@ import com.paubox.service.EmailService;
 
 public class TestEmailService {
 	EmailInterface email = new EmailService();
-	 Message message =new Message();
+	Message message =new Message();
+
+
 	
 	@BeforeClass
 	public static void  init(){
-		ConfigurationManager.getProperties("E:\\projects\\paubox-java\\Paubox_Java\\PauboxTest\\src\\resources\\config.properties");
+		String propertiesFile = System.getProperty("properties");
+		if (propertiesFile == null || propertiesFile.equals("")) {
+			propertiesFile = "src/test/config.properties";
+		}
+		ConfigurationManager.getProperties(propertiesFile);
+
+
 	}
 	
 	@Before

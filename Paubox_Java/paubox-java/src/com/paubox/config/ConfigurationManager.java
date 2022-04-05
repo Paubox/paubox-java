@@ -9,12 +9,13 @@ import java.util.Properties;
 import com.paubox.common.Constants;
 
 public class ConfigurationManager {
-	
+
+	private static Properties properties;
 	private static void readProperties(String fileAndPath){
 		try {
 			File file = new File(fileAndPath);
 			FileInputStream fileInput = new FileInputStream(file);
-			Properties properties = new Properties();
+			properties = new Properties();
 			properties.load(fileInput);
 			fileInput.close();
 			
@@ -33,9 +34,12 @@ public class ConfigurationManager {
 		Constants.API_USER=properties.getProperty("APIUSER");
 		
 	}
-	
+
 	public static void getProperties(String fileAndPath){
 		readProperties(fileAndPath);
+	}
+	public static String getProperty(String propertyName){
+		return properties.getProperty(propertyName);
 	}
 
 }
