@@ -1,0 +1,5 @@
+APIKEY=<put your API key for paubox here hexadecimal>
+APIUSER=<api user>
+BASE_URL=<microservice base URL>
+RECIPIENTS=<test@test.com where you want the email to go to >
+PDFFILE=src/test/testFile.pdf # for pdf attachment test
