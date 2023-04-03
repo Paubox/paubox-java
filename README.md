@@ -224,6 +224,54 @@ static void GetEmailDisposition()
 }
 ```
 
+## Dynamic Template
+
+- Create a dynamic template
+- Update a dynamic template
+- Delete a dynamic template
+- Get a list of dynamic templates
+- Get a specific dynamic template
+
+
+### Usage
+1. Import the DynamicTemplateService class in your Java code:
+
+```Java
+import com.paubox.service.DynamicTemplateService;
+```
+
+2. Create an instance of the DynamicTemplateService class with your credentials:
+
+```Java
+DynamicTemplateService service = new DynamicTemplateService(USERNAME, API_KEY);
+```
+4. Call the API methods as needed:
+```Java
+// Create a dynamic template
+String createTemplateResponse = service.createDynamicTemplate(TEMPLATE_NAME, TEMPLATE_FILE);
+
+// Update a dynamic template
+String updateTemplateResponse = service.updateDynamicTemplate(TEMPLATE_ID, TEMPLATE_NAME, TEMPLATE_FILE);
+
+// Delete a dynamic template
+String deleteTemplateResponse = service.deleteDynamicTemplate(TEMPLATE_ID);
+
+// Get a list of dynamic templates
+List<DynamicTemplate> templates = service.getAllDynamicTemplates();
+
+// Get a specific dynamic template
+DynamicTemplate template = service.getDynamicTemplate(TEMPLATE_ID);
+```
+
+5. Check the responses returned by the API calls:
+```Java
+System.out.println(createTemplateResponse);
+System.out.println(updateTemplateResponse);
+System.out.println(deleteTemplateResponse);
+System.out.println(templates);
+System.out.println(template);
+```
+
 <a name="#contributing"></a>
 ## Contributing
 
