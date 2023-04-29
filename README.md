@@ -272,6 +272,46 @@ System.out.println(templates);
 System.out.println(template);
 ```
 
+## Dynamic Template
+
+- Create a dynamic template
+- Update a dynamic template
+- Delete a dynamic template
+- Get a list of dynamic templates
+- Get a specific dynamic template
+
+
+### Usage
+1. Import the WebhookEndpointService class in your Java code:
+
+```Java
+import com.paubox.service.WebhookEndpointService;
+```
+
+2. Create an instance of the DynamicTemplateService class with your credentials:
+
+```Java
+DynamicTemplateService service = new WebhookEndpointService();
+```
+4. Call the API methods as needed:
+```Java
+// Create a dynamic template
+WebhookEndpointResponse CreateResponse = service.createWebhookEndpoint(WebhookEndpointRequest request);
+
+// Update a dynamic template
+WebhookEndpointResponse UpdateResponse = service.updateWebhookEndpoint(String endpointId, WebhookEndpointRequest request);
+
+// Delete a dynamic template
+WebhookEndpointResponse DeleteResponse = deleteWebhookEndpoint(String templateId);
+
+// Get a list of dynamic templates
+List<WebhookEndpoint> webhooks = service.getAllWebhookEndpoints();
+
+// Get a specific dynamic template
+WebhookEndpoint webhook = service.getWebhookEndpoint(String templateId);
+```
+
+
 <a name="#contributing"></a>
 ## Contributing
 
