@@ -272,13 +272,13 @@ System.out.println(templates);
 System.out.println(template);
 ```
 
-## Dynamic Template
+## Webhook Endpoint
 
-- Create a dynamic template
-- Update a dynamic template
-- Delete a dynamic template
-- Get a list of dynamic templates
-- Get a specific dynamic template
+- Create a webhook endpoint
+- Update a webhook endpoint
+- Delete a webhook endpoint
+- Get a list of webhook endpoints
+- Get a specific webhook endpoint
 
 
 ### Usage
@@ -288,7 +288,7 @@ System.out.println(template);
 import com.paubox.service.WebhookEndpointService;
 ```
 
-2. Create an instance of the DynamicTemplateService class with your credentials:
+2. Create an instance of the WebhookEndpointService class:
 
 ```Java
 DynamicTemplateService service = new WebhookEndpointService();
