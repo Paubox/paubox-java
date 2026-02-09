@@ -1,0 +1,1464 @@
+openapi: 3.0.0
+info:
+  description: |
+    Public documentation for Paubox's Transactional Email API
+
+    ## Authentication
+
+    **IMPORTANT**: This API uses a custom authentication format that requires the "Token token=" prefix.
+
+    All requests must include the Authorization header in this exact format:
+    ```
+    Authorization: Token token=YOUR_API_KEY
+    ```
+
+    **Note for Code Generation Tools**: Auto-generated code from this specification may need to be modified to include the "Token token=" prefix, as most generators expect standard Bearer token format.
+  title: Paubox Email API
+  version: 1.0.0
+servers:
+- description: Paubox Email API
+  url: "https://api.paubox.net/v1/{api_username}"
+  variables:
+    api_username:
+      default: YOUR_API_USERNAME
+      description: Your Paubox Email API endpoint username
+- description: SwaggerHub API Auto Mocking
+  url: https://virtserver.swaggerhub.com/paubox/transactional_email/1.0.0
+security:
+- PauboxToken: []
+tags:
+- description: Send individual or bulk transactional email
+  name: Messages
+- description: Manage and use dynamic Handlebars templates for email content
+  name: Dynamic Templates
+paths:
+  /messages:
+    post:
+      operationId: sendMessage
+      requestBody:
+        content:
+          application/json:
+            examples:
+              basic:
+                description: |
+                  **CURL Example:**
+                  ```bash
+                  curl --request POST \
+                    --url https://api.paubox.net/v1/YOUR_API_USERNAME/messages \
+                    --header 'Authorization: Token token=YOUR_API_KEY' \
+                    --header 'Content-Type: application/json' \
+                    --data '{"data":{"message":{"recipients":["recipient@host.com"],"headers":{"subject":"Hello from the Paubox Email API","from":"sender@verifieddomain.com"},"content":{"text/plain":"Hello world","text/html":"<html><body><h1>Hello world</h1></body></html>"}}}}'
+                  ```
+                summary: Minimal text+HTML example
+                value:
+                  data:
+                    message:
+                      recipients:
+                      - recipient@host.com
+                      headers:
+                        subject: Hello from the Paubox Email API
+                        from: sender@verifieddomain.com
+                      content:
+                        text/plain: Hello world
+                        text/html: <html><body><h1>Hello world</h1></body></html>
+              full:
+                summary: "Full example with bcc, reply-to, custom header, attachment,\
+                  \ and overrides"
+                value:
+                  data:
+                    message:
+                      recipients:
+                      - recipient@host.com
+                      - Recipient Name <recipient2@host.com>
+                      bcc:
+                      - recipient3@host.com
+                      - Recipient Name <recipient4@host.com>
+                      cc:
+                      - cc.name <cc@example.com>
+                      headers:
+                        subject: sample email
+                        from: sender@authorized_domain.com
+                        reply-to: Sender Name <sender@authorized_domain.com>
+                        x-custom-header: sample custom header
+                        List-Unsubscribe: <mailto:unsubscribe@yourdomain.com?subject=unsubscribe>
+                      content:
+                        text/plain: Hello World!
+                        text/html: <html><body><h1>Hello World!</h1></body></html>
+                      attachments:
+                      - fileName: hello_world.txt
+                        contentType: text/plain
+                        content: SGVsbG8gV29ybGQh
+                    override_open_tracking: true
+                    override_link_tracking: true
+                    unsubscribe_url: https://your_url_here.com
+            schema:
+              $ref: "#/components/schemas/SingleSendRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    sourceTrackingId: 3d38ab13-0af8-4028-bd45-52e882e0d584
+                    customHeaders:
+                      X-Custom-Header: value
+                    data: Service OK
+              schema:
+                $ref: "#/components/schemas/SingleSendResponse"
+          description: Message accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+      security:
+      - PauboxToken: []
+      summary: Send a single email message
+      tags:
+      - Messages
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /bulk_messages:
+    post:
+      description: |
+        Sends multiple messages in one request. Paubox recommends batches of 50 or fewer. Source tracking IDs are returned in the same order as the messages array.
+      operationId: sendBulkMessages
+      requestBody:
+        content:
+          application/json:
+            examples:
+              twoMessages:
+                summary: Two-message batch
+                value:
+                  data:
+                    messages:
+                    - recipients:
+                      - recipient@host.com
+                      - Recipient Name <recipient@host.com>
+                      bcc:
+                      - recipient3@host.com
+                      - Recipient Name <recipient4@host.com>
+                      headers:
+                        subject: sample email
+                        from: sender@authorized_domain.com
+                        reply-to: Sender Name <sender@authorized_domain.com>
+                        x-custom-header: sample custom header
+                      content:
+                        text/plain: Hello World!
+                        text/html: <html><body><h1>Hello World!</h1></body></html>
+                      attachments:
+                      - fileName: hello_world.txt
+                        contentType: text/plain
+                        content: SGVsbG8gV29ybGQh
+                      allowNonTLS: false
+                      forceSecureNotification: false
+                    - recipients:
+                      - recipient2@host.com
+                      - Recipient Name <recipient2@host.com>
+                      headers:
+                        subject: sample email
+                        from: sender@authorized_domain.com
+                        reply-to: Sender Name <sender@authorized_domain.com>
+                      content:
+                        text/plain: Hello World!
+                        text/html: <html><body><h1>Hello World!</h1></body></html>
+                      attachments:
+                      - fileName: hello_world.txt
+                        contentType: text/plain
+                        content: SGVsbG8gV29ybGQh
+            schema:
+              $ref: "#/components/schemas/BulkSendRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                ok:
+                  value:
+                    messages:
+                    - sourceTrackingId: 3d38ab13-0af8-4028-bd45-999999999999
+                      customHeaders:
+                        X-Custom-Header: value
+                      data: Service OK
+                    - sourceTrackingId: 3d38ab13-0af8-4028-bd45-000000000000
+                      customHeaders:
+                        X-Custom-Header: value
+                      data: Service OK
+              schema:
+                $ref: "#/components/schemas/BulkSendResponse"
+          description: Batch accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+      security:
+      - PauboxToken: []
+      summary: Send multiple email messages (batch)
+      tags:
+      - Messages
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /message_receipt:
+    get:
+      description: "Retrieve delivery status, open tracking, and click tracking information\
+        \ for a sent message"
+      operationId: getMessageReceipt
+      parameters:
+      - description: The tracking ID returned when the message was sent
+        explode: true
+        in: query
+        name: sourceTrackingId
+        required: true
+        schema:
+          example: 6e1cf9a4-7bde-4834-8200-ed424b50c8a7
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                delivered:
+                  summary: Delivered message with open and click tracking
+                  value:
+                    sourceTrackingId: 6e1cf9a4-7bde-4834-8200-ed424b50c8a7
+                    data:
+                      message:
+                        id: <f4a9b518-439c-497d-b87f-dfc9cc19194b@authorized_domain.com>
+                        message_deliveries:
+                        - recipient: recipient@host.com
+                          status:
+                            deliveryStatus: delivered
+                            deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+                            openedStatus: opened
+                            openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+                        total_opens: 1
+                        distinct_opens: 1
+                        total_click_count: 2
+                        clicks_per_link:
+                        - click_count: 1
+                          target_url: amazon.com
+                        - click_count: 1
+                          target_url: ebay.com
+                        unsubscribed: false
+              schema:
+                $ref: "#/components/schemas/MessageReceiptResponse"
+          description: Message disposition data
+        "404":
+          content:
+            application/json:
+              examples:
+                notFound:
+                  summary: Message not found
+                  value:
+                    errors:
+                    - code: 404
+                      title: Message was not found
+                      details: Message with this tracking id was not found
+                    sourceTrackingId: 6e1cf9a4-7bde-4834-8d200-ed424b50c8a7
+              schema:
+                $ref: "#/components/schemas/MessageReceiptErrorResponse"
+          description: Message not found
+      security:
+      - PauboxToken: []
+      summary: Get email disposition
+      tags:
+      - Messages
+      x-accepts:
+      - application/json
+  /dynamic_templates:
+    get:
+      description: Retrieve all dynamic templates for your organization
+      operationId: listDynamicTemplates
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DynamicTemplateListResponse"
+          description: List of templates
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+      security:
+      - PauboxToken: []
+      summary: List all dynamic templates
+      tags:
+      - Dynamic Templates
+      x-accepts:
+      - application/json
+    post:
+      description: Upload a new Handlebars template for dynamic content generation
+      operationId: createDynamicTemplate
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/createDynamicTemplate_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DynamicTemplateResponse"
+          description: Template created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+      security:
+      - PauboxToken: []
+      summary: Create a dynamic template
+      tags:
+      - Dynamic Templates
+      x-content-type: multipart/form-data
+      x-accepts:
+      - application/json
+  /dynamic_templates/{id}:
+    delete:
+      description: Delete a specific dynamic template by ID
+      operationId: deleteDynamicTemplate
+      parameters:
+      - description: Template ID to delete
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/deleteDynamicTemplate_200_response"
+          description: Template deleted successfully
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Template not found
+      security:
+      - PauboxToken: []
+      summary: Delete a dynamic template
+      tags:
+      - Dynamic Templates
+      x-accepts:
+      - application/json
+    get:
+      description: Retrieve a specific dynamic template by ID
+      operationId: getDynamicTemplate
+      parameters:
+      - description: Template ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DynamicTemplateResponse"
+          description: Template details
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Template not found
+      security:
+      - PauboxToken: []
+      summary: Get a dynamic template
+      tags:
+      - Dynamic Templates
+      x-accepts:
+      - application/json
+    patch:
+      description: Update an existing Handlebars template
+      operationId: updateDynamicTemplate
+      parameters:
+      - description: Template ID to update
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/updateDynamicTemplate_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DynamicTemplateResponse"
+          description: Template updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Template not found
+      security:
+      - PauboxToken: []
+      summary: Update a dynamic template
+      tags:
+      - Dynamic Templates
+      x-content-type: multipart/form-data
+      x-accepts:
+      - application/json
+  /templated_messages:
+    post:
+      description: Send an email using a dynamic template with variable substitution
+      operationId: sendTemplatedMessage
+      requestBody:
+        content:
+          application/json:
+            examples:
+              basic:
+                summary: Basic templated message
+                value:
+                  data:
+                    template_name: detailed_test
+                    template_values: "{ \"name\": \"Howard\", \"conditional\":\"true\"\
+                      ,\"items\":[\"one\",\"two\",\"three\"] }"
+                    message:
+                      recipients:
+                      - recipient@host.com
+                      - Recipient Name <recipient2@host.com>
+                      bcc:
+                      - recipient3@host.com
+                      - Recipient Name <recipient4@host.com>
+                      headers:
+                        subject: sample email
+                        from: sender@authorized_domain.com
+                        reply-to: Sender Name <sender@authorized_domain.com>
+                      allowNonTLS: false
+                      forceSecureNotification: false
+                      attachments:
+                      - fileName: hello_world.txt
+                        contentType: text/plain
+                        content: SGVsbG8gV29ybGQ
+            schema:
+              $ref: "#/components/schemas/TemplatedMessageRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    sourceTrackingId: 3d38ab13-0af8-4028-bd45-XXXXXXXXXXXX
+                    data: Service OK
+              schema:
+                $ref: "#/components/schemas/SingleSendResponse"
+          description: Templated message sent successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad request
+      security:
+      - PauboxToken: []
+      summary: Send a dynamically templated message
+      tags:
+      - Dynamic Templates
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    SingleSendRequest:
+      example:
+        data:
+          override_link_tracking: true
+          override_open_tracking: true
+          message:
+            cc:
+            - cc
+            - cc
+            headers:
+              List-Unsubscribe-Post: List-Unsubscribe-Post
+              subject: subject
+              List-Unsubscribe: List-Unsubscribe
+              from: from
+              x-custom-header: x-custom-header
+              additionalProperties: additionalProperties
+              reply-to: reply-to
+            bcc:
+            - bcc
+            - bcc
+            attachments:
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            allowNonTLS: false
+            recipients:
+            - recipients
+            - recipients
+            forceSecureNotification: false
+            content:
+              text/html: text/html
+              text/plain: text/plain
+          unsubscribe_url: https://openapi-generator.tech
+      properties:
+        data:
+          $ref: "#/components/schemas/SingleSendRequest_data"
+      required:
+      - data
+      type: object
+    BulkSendRequest:
+      example:
+        data:
+          messages:
+          - cc:
+            - cc
+            - cc
+            headers:
+              List-Unsubscribe-Post: List-Unsubscribe-Post
+              subject: subject
+              List-Unsubscribe: List-Unsubscribe
+              from: from
+              x-custom-header: x-custom-header
+              additionalProperties: additionalProperties
+              reply-to: reply-to
+            bcc:
+            - bcc
+            - bcc
+            attachments:
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            allowNonTLS: false
+            recipients:
+            - recipients
+            - recipients
+            forceSecureNotification: false
+            content:
+              text/html: text/html
+              text/plain: text/plain
+          - cc:
+            - cc
+            - cc
+            headers:
+              List-Unsubscribe-Post: List-Unsubscribe-Post
+              subject: subject
+              List-Unsubscribe: List-Unsubscribe
+              from: from
+              x-custom-header: x-custom-header
+              additionalProperties: additionalProperties
+              reply-to: reply-to
+            bcc:
+            - bcc
+            - bcc
+            attachments:
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            allowNonTLS: false
+            recipients:
+            - recipients
+            - recipients
+            forceSecureNotification: false
+            content:
+              text/html: text/html
+              text/plain: text/plain
+      properties:
+        data:
+          $ref: "#/components/schemas/BulkSendRequest_data"
+      required:
+      - data
+      type: object
+    Message:
+      example:
+        cc:
+        - cc
+        - cc
+        headers:
+          List-Unsubscribe-Post: List-Unsubscribe-Post
+          subject: subject
+          List-Unsubscribe: List-Unsubscribe
+          from: from
+          x-custom-header: x-custom-header
+          additionalProperties: additionalProperties
+          reply-to: reply-to
+        bcc:
+        - bcc
+        - bcc
+        attachments:
+        - fileName: fileName
+          contentType: contentType
+          content: content
+        - fileName: fileName
+          contentType: contentType
+          content: content
+        allowNonTLS: false
+        recipients:
+        - recipients
+        - recipients
+        forceSecureNotification: false
+        content:
+          text/html: text/html
+          text/plain: text/plain
+      properties:
+        recipients:
+          items:
+            description: "Email address, optionally with display name (e.g., \"J.\
+              \ Smith <jsmith@host.com>\")."
+            type: string
+          minItems: 1
+          type: array
+        bcc:
+          items:
+            type: string
+          type: array
+        cc:
+          items:
+            type: string
+          type: array
+        headers:
+          $ref: "#/components/schemas/MessageHeaders"
+        allowNonTLS:
+          default: false
+          description: |
+            Allow delivery over non-TLS rather than converting to a Secure Portal message. Not HIPAA-compliant if the message contains PHI.
+          type: boolean
+        forceSecureNotification:
+          default: false
+          description: |
+            Force delivery as a Paubox Secure Message; recipient gets a pickup notification with a link.
+          type: boolean
+        content:
+          $ref: "#/components/schemas/MessageContent"
+        attachments:
+          items:
+            $ref: "#/components/schemas/Attachment"
+          type: array
+      required:
+      - content
+      - headers
+      - recipients
+      type: object
+    MessageHeaders:
+      example:
+        List-Unsubscribe-Post: List-Unsubscribe-Post
+        subject: subject
+        List-Unsubscribe: List-Unsubscribe
+        from: from
+        x-custom-header: x-custom-header
+        additionalProperties: additionalProperties
+        reply-to: reply-to
+      properties:
+        subject:
+          type: string
+        from:
+          description: Must match the verified domain of your API key.
+          type: string
+        reply-to:
+          description: Reply-to address; must match a verified domain if different
+            from from.
+          type: string
+        List-Unsubscribe:
+          description: |
+            Insert a List-Unsubscribe header (mailto and/or http). See RFC guidance for syntax.
+          type: string
+        List-Unsubscribe-Post:
+          description: Used in conjunction with List-Unsubscribe header.
+          type: string
+        x-custom-header:
+          description: Example custom header; any custom header may be added with
+            an X- prefix.
+          type: string
+        additionalProperties:
+          description: Any additional X- prefixed custom header values.
+          type: string
+      required:
+      - from
+      - subject
+      type: object
+    MessageContent:
+      example:
+        text/html: text/html
+        text/plain: text/plain
+      nullable: true
+      oneOf: []
+      properties:
+        text/plain:
+          description: Plain text message body. Required if text/html is not provided.
+          type: string
+        text/html:
+          description: |
+            HTML message body. May be HTML-escaped, base64-encoded, or a valid unescaped string. CSS in <style> tags will be rendered inline.
+          type: string
+      type: object
+    Attachment:
+      example:
+        fileName: fileName
+        contentType: contentType
+        content: content
+      properties:
+        fileName:
+          type: string
+        contentType:
+          description: "Valid MIME type, e.g., application/pdf."
+          type: string
+        content:
+          description: Base64-encoded file contents.
+          type: string
+      required:
+      - content
+      - contentType
+      - fileName
+      type: object
+    SingleSendResponse:
+      example:
+        sourceTrackingId: sourceTrackingId
+        data: Service OK
+        customHeaders:
+          key: customHeaders
+      properties:
+        sourceTrackingId:
+          description: Identifier for tracking the message source.
+          type: string
+        customHeaders:
+          additionalProperties:
+            type: string
+          type: object
+        data:
+          example: Service OK
+          type: string
+      type: object
+    BulkSendResponse:
+      example:
+        messages:
+        - sourceTrackingId: sourceTrackingId
+          data: Service OK
+          customHeaders:
+            key: customHeaders
+        - sourceTrackingId: sourceTrackingId
+          data: Service OK
+          customHeaders:
+            key: customHeaders
+      properties:
+        messages:
+          items:
+            $ref: "#/components/schemas/BulkSendResponse_messages_inner"
+          type: array
+      type: object
+    ErrorResponse:
+      example:
+        errors:
+        - code: 0
+          details: details
+          title: title
+        - code: 0
+          details: details
+          title: title
+      properties:
+        errors:
+          items:
+            $ref: "#/components/schemas/ErrorResponse_errors_inner"
+          type: array
+      type: object
+    MessageReceiptResponse:
+      example:
+        sourceTrackingId: 6e1cf9a4-7bde-4834-8200-ed424b50c8a7
+        data:
+          message:
+            unsubscribed: false
+            clicks_per_link:
+            - target_url: amazon.com
+              click_count: 1
+            - target_url: amazon.com
+              click_count: 1
+            total_opens: 1
+            message_deliveries:
+            - recipient: recipient@host.com
+              status:
+                deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+                openedStatus: opened
+                openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+                deliveryStatus: delivered
+            - recipient: recipient@host.com
+              status:
+                deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+                openedStatus: opened
+                openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+                deliveryStatus: delivered
+            id: <f4a9b518-439c-497d-b87f-dfc9cc19194b@authorized_domain.com>
+            distinct_opens: 1
+            total_click_count: 2
+      properties:
+        sourceTrackingId:
+          description: The tracking ID for the message
+          example: 6e1cf9a4-7bde-4834-8200-ed424b50c8a7
+          type: string
+        data:
+          $ref: "#/components/schemas/MessageReceiptResponse_data"
+      required:
+      - data
+      - sourceTrackingId
+      type: object
+    MessageReceiptErrorResponse:
+      example:
+        sourceTrackingId: 6e1cf9a4-7bde-4834-8d200-ed424b50c8a7
+        errors:
+        - code: 0
+          details: details
+          title: title
+        - code: 0
+          details: details
+          title: title
+      properties:
+        errors:
+          items:
+            $ref: "#/components/schemas/ErrorResponse_errors_inner"
+          type: array
+        sourceTrackingId:
+          description: The tracking ID for the message
+          example: 6e1cf9a4-7bde-4834-8d200-ed424b50c8a7
+          type: string
+      required:
+      - errors
+      - sourceTrackingId
+      type: object
+    MessageDelivery:
+      example:
+        recipient: recipient@host.com
+        status:
+          deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+          openedStatus: opened
+          openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+          deliveryStatus: delivered
+      properties:
+        recipient:
+          description: The recipient email address
+          example: recipient@host.com
+          type: string
+        status:
+          $ref: "#/components/schemas/DeliveryStatus"
+      required:
+      - recipient
+      - status
+      type: object
+    DeliveryStatus:
+      example:
+        deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+        openedStatus: opened
+        openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+        deliveryStatus: delivered
+      properties:
+        deliveryStatus:
+          description: The delivery status of the message
+          enum:
+          - processing
+          - "TLS not offered, sending via Secure Portal"
+          - soft bounced
+          - soft bounced - mailbox full
+          - hard bounced
+          - Internal error. Please check back later.
+          - delivered
+          - delivered via secure portal
+          example: delivered
+          type: string
+        deliveryTime:
+          description: The time when the message was delivered (if applicable)
+          example: "Mon, 23 Apr 2018 13:27:34 -0700"
+          type: string
+        openedStatus:
+          description: Whether the message was opened (single recipient only)
+          enum:
+          - opened
+          - not opened
+          example: opened
+          type: string
+        openedTime:
+          description: The time when the message was first opened (single recipient
+            only)
+          example: "Mon, 23 Apr 2018 13:27:51 -0700"
+          type: string
+      required:
+      - deliveryStatus
+      type: object
+    ClickData:
+      example:
+        target_url: amazon.com
+        click_count: 1
+      properties:
+        click_count:
+          description: Number of clicks on this specific link
+          example: 1
+          type: integer
+        target_url:
+          description: The URL that was clicked
+          example: amazon.com
+          type: string
+      required:
+      - click_count
+      - target_url
+      type: object
+    DynamicTemplateResponse:
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        name: welcome_template
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: template_123
+        body: "Hello {{name}}, welcome to our service!"
+      properties:
+        id:
+          description: Template ID
+          example: template_123
+          type: string
+        name:
+          description: Template name
+          example: welcome_template
+          type: string
+        body:
+          description: Template content (Handlebars)
+          example: "Hello {{name}}, welcome to our service!"
+          type: string
+        created_at:
+          description: Template creation timestamp
+          format: date-time
+          type: string
+        updated_at:
+          description: Template last update timestamp
+          format: date-time
+          type: string
+      type: object
+    DynamicTemplateListResponse:
+      example:
+        templates:
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          name: welcome_template
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: template_123
+          body: "Hello {{name}}, welcome to our service!"
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          name: welcome_template
+          created_at: 2000-01-23T04:56:07.000+00:00
+          id: template_123
+          body: "Hello {{name}}, welcome to our service!"
+      properties:
+        templates:
+          items:
+            $ref: "#/components/schemas/DynamicTemplateResponse"
+          type: array
+      type: object
+    TemplatedMessageRequest:
+      example:
+        data:
+          template_name: detailed_test
+          template_values: "{ \"name\": \"Howard\", \"conditional\":\"true\",\"items\"\
+            :[\"one\",\"two\",\"three\"] }"
+          message:
+            cc:
+            - cc
+            - cc
+            headers:
+              List-Unsubscribe-Post: List-Unsubscribe-Post
+              subject: subject
+              List-Unsubscribe: List-Unsubscribe
+              from: from
+              additionalProperties: additionalProperties
+              reply-to: reply-to
+            bcc:
+            - bcc
+            - bcc
+            attachments:
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            - fileName: fileName
+              contentType: contentType
+              content: content
+            allowNonTLS: false
+            recipients:
+            - recipients
+            - recipients
+            forceSecureNotification: false
+      properties:
+        data:
+          $ref: "#/components/schemas/TemplatedMessageRequest_data"
+      required:
+      - data
+      type: object
+    TemplatedMessage:
+      example:
+        cc:
+        - cc
+        - cc
+        headers:
+          List-Unsubscribe-Post: List-Unsubscribe-Post
+          subject: subject
+          List-Unsubscribe: List-Unsubscribe
+          from: from
+          additionalProperties: additionalProperties
+          reply-to: reply-to
+        bcc:
+        - bcc
+        - bcc
+        attachments:
+        - fileName: fileName
+          contentType: contentType
+          content: content
+        - fileName: fileName
+          contentType: contentType
+          content: content
+        allowNonTLS: false
+        recipients:
+        - recipients
+        - recipients
+        forceSecureNotification: false
+      properties:
+        recipients:
+          items:
+            description: "Email address, optionally with display name (e.g., \"J.\
+              \ Smith <jsmith@host.com>\")."
+            type: string
+          minItems: 1
+          type: array
+        bcc:
+          items:
+            type: string
+          type: array
+        cc:
+          items:
+            type: string
+          type: array
+        headers:
+          $ref: "#/components/schemas/TemplatedMessageHeaders"
+        allowNonTLS:
+          default: false
+          description: |
+            Allow delivery over non-TLS rather than converting to a Secure Portal message. Not HIPAA-compliant if the message contains PHI.
+          type: boolean
+        forceSecureNotification:
+          default: false
+          description: |
+            Force delivery as a Paubox Secure Message; recipient gets a pickup notification with a link.
+          type: boolean
+        attachments:
+          items:
+            $ref: "#/components/schemas/Attachment"
+          type: array
+      required:
+      - headers
+      - recipients
+      type: object
+    TemplatedMessageHeaders:
+      example:
+        List-Unsubscribe-Post: List-Unsubscribe-Post
+        subject: subject
+        List-Unsubscribe: List-Unsubscribe
+        from: from
+        additionalProperties: additionalProperties
+        reply-to: reply-to
+      properties:
+        subject:
+          description: Message subject (can include template variables)
+          type: string
+        from:
+          description: Must match the verified domain of your API key.
+          type: string
+        reply-to:
+          description: Reply-to address; must match a verified domain if different
+            from from.
+          type: string
+        List-Unsubscribe:
+          description: |
+            Insert a List-Unsubscribe header (mailto and/or http). See RFC guidance for syntax.
+          type: string
+        List-Unsubscribe-Post:
+          description: Used in conjunction with List-Unsubscribe header.
+          type: string
+        additionalProperties:
+          description: Any additional custom header values.
+          type: string
+      required:
+      - from
+      - subject
+      type: object
+    createDynamicTemplate_request:
+      properties:
+        data[name]:
+          description: Name for the template
+          example: welcome_template
+          type: string
+        data[body]:
+          description: Handlebars template file (.hbs)
+          format: binary
+          type: string
+      required:
+      - "data[body]"
+      - "data[name]"
+      type: object
+    deleteDynamicTemplate_200_response:
+      example:
+        message: Template deleted successfully
+      properties:
+        message:
+          example: Template deleted successfully
+          type: string
+      type: object
+    updateDynamicTemplate_request:
+      properties:
+        data[name]:
+          description: Updated name for the template
+          example: updated_welcome_template
+          type: string
+        data[body]:
+          description: Updated Handlebars template file (.hbs)
+          format: binary
+          type: string
+      type: object
+    SingleSendRequest_data:
+      example:
+        override_link_tracking: true
+        override_open_tracking: true
+        message:
+          cc:
+          - cc
+          - cc
+          headers:
+            List-Unsubscribe-Post: List-Unsubscribe-Post
+            subject: subject
+            List-Unsubscribe: List-Unsubscribe
+            from: from
+            x-custom-header: x-custom-header
+            additionalProperties: additionalProperties
+            reply-to: reply-to
+          bcc:
+          - bcc
+          - bcc
+          attachments:
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          allowNonTLS: false
+          recipients:
+          - recipients
+          - recipients
+          forceSecureNotification: false
+          content:
+            text/html: text/html
+            text/plain: text/plain
+        unsubscribe_url: https://openapi-generator.tech
+      properties:
+        message:
+          $ref: "#/components/schemas/Message"
+        override_open_tracking:
+          description: Set to true to enable open tracking for this message.
+          type: boolean
+        override_link_tracking:
+          description: Set to true to enable click tracking for this message (up to
+            1000 links).
+          type: boolean
+        unsubscribe_url:
+          description: URL to redirect unsubscribe requests for unsubscribe tracking.
+          format: uri
+          type: string
+      required:
+      - message
+      type: object
+    BulkSendRequest_data:
+      example:
+        messages:
+        - cc:
+          - cc
+          - cc
+          headers:
+            List-Unsubscribe-Post: List-Unsubscribe-Post
+            subject: subject
+            List-Unsubscribe: List-Unsubscribe
+            from: from
+            x-custom-header: x-custom-header
+            additionalProperties: additionalProperties
+            reply-to: reply-to
+          bcc:
+          - bcc
+          - bcc
+          attachments:
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          allowNonTLS: false
+          recipients:
+          - recipients
+          - recipients
+          forceSecureNotification: false
+          content:
+            text/html: text/html
+            text/plain: text/plain
+        - cc:
+          - cc
+          - cc
+          headers:
+            List-Unsubscribe-Post: List-Unsubscribe-Post
+            subject: subject
+            List-Unsubscribe: List-Unsubscribe
+            from: from
+            x-custom-header: x-custom-header
+            additionalProperties: additionalProperties
+            reply-to: reply-to
+          bcc:
+          - bcc
+          - bcc
+          attachments:
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          allowNonTLS: false
+          recipients:
+          - recipients
+          - recipients
+          forceSecureNotification: false
+          content:
+            text/html: text/html
+            text/plain: text/plain
+      properties:
+        messages:
+          description: Recommended 50 or fewer per request.
+          items:
+            $ref: "#/components/schemas/Message"
+          type: array
+      required:
+      - messages
+      type: object
+    BulkSendResponse_messages_inner:
+      example:
+        sourceTrackingId: sourceTrackingId
+        data: Service OK
+        customHeaders:
+          key: customHeaders
+      properties:
+        sourceTrackingId:
+          type: string
+        customHeaders:
+          additionalProperties:
+            type: string
+          type: object
+        data:
+          example: Service OK
+          type: string
+      type: object
+    ErrorResponse_errors_inner:
+      example:
+        code: 0
+        details: details
+        title: title
+      properties:
+        code:
+          type: integer
+        title:
+          type: string
+        details:
+          type: string
+      type: object
+    MessageReceiptResponse_data_message:
+      example:
+        unsubscribed: false
+        clicks_per_link:
+        - target_url: amazon.com
+          click_count: 1
+        - target_url: amazon.com
+          click_count: 1
+        total_opens: 1
+        message_deliveries:
+        - recipient: recipient@host.com
+          status:
+            deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+            openedStatus: opened
+            openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+            deliveryStatus: delivered
+        - recipient: recipient@host.com
+          status:
+            deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+            openedStatus: opened
+            openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+            deliveryStatus: delivered
+        id: <f4a9b518-439c-497d-b87f-dfc9cc19194b@authorized_domain.com>
+        distinct_opens: 1
+        total_click_count: 2
+      properties:
+        id:
+          description: The message ID
+          example: <f4a9b518-439c-497d-b87f-dfc9cc19194b@authorized_domain.com>
+          type: string
+        message_deliveries:
+          items:
+            $ref: "#/components/schemas/MessageDelivery"
+          type: array
+        total_opens:
+          description: Total number of opens (single recipient only)
+          example: 1
+          type: integer
+        distinct_opens:
+          description: Number of distinct opens (single recipient only)
+          example: 1
+          type: integer
+        total_click_count:
+          description: Total number of clicks (single recipient only)
+          example: 2
+          type: integer
+        clicks_per_link:
+          description: Click tracking data per link (single recipient only)
+          items:
+            $ref: "#/components/schemas/ClickData"
+          type: array
+        unsubscribed:
+          description: Whether the recipient has unsubscribed (single recipient only)
+          example: false
+          type: boolean
+      required:
+      - id
+      - message_deliveries
+      type: object
+    MessageReceiptResponse_data:
+      example:
+        message:
+          unsubscribed: false
+          clicks_per_link:
+          - target_url: amazon.com
+            click_count: 1
+          - target_url: amazon.com
+            click_count: 1
+          total_opens: 1
+          message_deliveries:
+          - recipient: recipient@host.com
+            status:
+              deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+              openedStatus: opened
+              openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+              deliveryStatus: delivered
+          - recipient: recipient@host.com
+            status:
+              deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700"
+              openedStatus: opened
+              openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
+              deliveryStatus: delivered
+          id: <f4a9b518-439c-497d-b87f-dfc9cc19194b@authorized_domain.com>
+          distinct_opens: 1
+          total_click_count: 2
+      properties:
+        message:
+          $ref: "#/components/schemas/MessageReceiptResponse_data_message"
+      required:
+      - message
+      type: object
+    TemplatedMessageRequest_data:
+      example:
+        template_name: detailed_test
+        template_values: "{ \"name\": \"Howard\", \"conditional\":\"true\",\"items\"\
+          :[\"one\",\"two\",\"three\"] }"
+        message:
+          cc:
+          - cc
+          - cc
+          headers:
+            List-Unsubscribe-Post: List-Unsubscribe-Post
+            subject: subject
+            List-Unsubscribe: List-Unsubscribe
+            from: from
+            additionalProperties: additionalProperties
+            reply-to: reply-to
+          bcc:
+          - bcc
+          - bcc
+          attachments:
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          - fileName: fileName
+            contentType: contentType
+            content: content
+          allowNonTLS: false
+          recipients:
+          - recipients
+          - recipients
+          forceSecureNotification: false
+      properties:
+        template_name:
+          description: The name of the template to use (must match exactly)
+          example: detailed_test
+          type: string
+        template_values:
+          description: JSON-formatted string containing template variable values
+          example: "{ \"name\": \"Howard\", \"conditional\":\"true\",\"items\":[\"\
+            one\",\"two\",\"three\"] }"
+          type: string
+        message:
+          $ref: "#/components/schemas/TemplatedMessage"
+      required:
+      - message
+      - template_name
+      - template_values
+      type: object
+  securitySchemes:
+    PauboxToken:
+      description: |
+        Paubox API uses a custom token format in the Authorization header.
+
+        **IMPORTANT**: You must prefix your API key with "Token token="
+
+        Format: `Authorization: Token token=YOUR_API_KEY_HERE`
+
+        Example: `Authorization: Token token=9e5b092b632445b8f570c62ae54f30fda1044305`
+
+        Do NOT use just the API key alone or Bearer token format.
+      in: header
+      name: Authorization
+      type: apiKey
+
