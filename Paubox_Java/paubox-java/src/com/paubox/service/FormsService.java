@@ -8,7 +8,7 @@ import com.paubox.data.FormSubmissionRequest;
 
 public class FormsService implements FormsInterface {
 
-    private static final String FORMS_BASE_URL = "https://next.paubox.com";
+    private static final String FORMS_BASE_URL = "https://apx.paubox.com/forms";
 
     public Form getForm(String formId) throws Exception {
         String url = FORMS_BASE_URL + "/public/form_data/" + formId;
