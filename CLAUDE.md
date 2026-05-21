@@ -7,7 +7,7 @@ Developer context for working on this SDK.
 This repo is the official Java wrapper for two Paubox APIs:
 
 - **Paubox Email API** — send HIPAA-compliant emails, check delivery status. Requires an API key and username. Base URL: `https://api.paubox.net/v1/{API_USER}/`
-- **Paubox Forms API** — retrieve form definitions and submit responses. No API key required. Base URL: `https://next.paubox.com`
+- **Paubox Forms API** — retrieve form definitions and submit responses. No API key required. Base URL: `https://apx.paubox.com/forms`
 
 ## Project Layout
 
