@@ -102,4 +102,36 @@ public class APIHelper {
 
 	}
 
+/**
+ * Call http POST API and return the HTTP status code.
+ * Use when the response body may be empty (e.g. 201 No Content).
+ * @param baseAPIUrl String
+ * @param authHeader String
+ * @param requestBody String
+ * @return int HTTP status code
+ * @throws Exception
+ */
+	public static int callToAPIByPostReturnCode(String baseAPIUrl, String authHeader, String requestBody) throws Exception {
+		try {
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			HttpPost postRequest = new HttpPost(baseAPIUrl);
+
+			StringEntity input = new StringEntity(requestBody);
+			input.setContentType("application/json");
+			postRequest.setEntity(input);
+
+			if (null != authHeader) {
+				postRequest.addHeader("Authorization", authHeader);
+			}
+
+			HttpResponse response = httpClient.execute(postRequest);
+			return response.getStatusLine().getStatusCode();
+
+		} catch (MalformedURLException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
 }
