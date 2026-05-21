@@ -11,9 +11,12 @@ The API wrapper allows you to construct and send messages.
 
 # Table of Contents
 * [Installation](#installation)
-*  [Usage](#usage)
-*  [Contributing](#contributing)
-*  [License](#license)
+* [Usage](#usage)
+  * [Sending messages](#sending-messages)
+  * [Checking Email Dispositions](#checking-email-dispositions)
+  * [Paubox Forms](#paubox-forms)
+* [Contributing](#contributing)
+* [License](#license)
 
 <a name="#installation"></a>
 ## Installation
@@ -225,6 +228,84 @@ static void GetEmailDisposition()
  GetEmailDispositionResponse response = email.GetEmailDisposition(“2a3c048485aa4cf6”);
 }
 ```
+
+<a name="paubox-forms"></a>
+## Paubox Forms
+
+Paubox Forms is a secure form product included with Paubox Email Suite. The Forms API requires **no API key** — the endpoints are public and called on behalf of form respondents.
+
+### Getting a form definition
+
+Retrieve a form's HTML, JSON schema, and CSS before rendering it:
+
+```java
+import com.paubox.data.Form;
+import com.paubox.service.FormsInterface;
+import com.paubox.service.FormsService;
+
+static Form GetForm(String formId) throws Exception {
+    FormsInterface forms = new FormsService();
+    Form form = forms.getForm(formId);
+    System.out.println("Title: " + form.getTitle());
+    System.out.println("Active: " + form.isActive());
+    return form;
+}
+```
+
+### Submitting a form response
+
+Submit a respondent's answers. The `formData` keys must match the field names in the form's JSON schema (`form.getFormJson()`):
+
+```java
+import com.paubox.data.FormSubmissionRequest;
+import com.paubox.service.FormsInterface;
+import com.paubox.service.FormsService;
+import java.util.HashMap;
+import java.util.Map;
+
+static void SubmitForm(String formId) throws Exception {
+    Map<String, Object> data = new HashMap<>();
+    data.put("first_name", "Jane");
+    data.put("last_name", "Smith");
+    data.put("email", "jane@example.com");
+
+    FormSubmissionRequest submission = new FormSubmissionRequest(data);
+    FormsInterface forms = new FormsService();
+    forms.submitForm(formId, submission);
+}
+```
+
+### Submitting with file attachments
+
+```java
+import com.paubox.data.FormSubmissionAttachment;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+
+static void SubmitFormWithAttachment(String formId) throws Exception {
+    Map<String, Object> data = new HashMap<>();
+    data.put("first_name", "Jane");
+
+    FormSubmissionAttachment attachment = new FormSubmissionAttachment();
+    attachment.setName("consent.pdf");
+    byte[] fileBytes = Files.readAllBytes(Paths.get("consent.pdf"));
+    attachment.setContent(Base64.getEncoder().encodeToString(fileBytes));
+
+    List<FormSubmissionAttachment> attachments = new ArrayList<>();
+    attachments.add(attachment);
+
+    FormSubmissionRequest submission = new FormSubmissionRequest(data);
+    submission.setAttachments(attachments);
+
+    FormsInterface forms = new FormsService();
+    forms.submitForm(formId, submission);
+}
+```
+
+Maximum submission size is **250 MB** to accommodate file attachments.
 
 <a name="#contributing"></a>
 ## Contributing
