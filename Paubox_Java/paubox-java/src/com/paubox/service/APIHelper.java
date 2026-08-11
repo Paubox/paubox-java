@@ -9,8 +9,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 public class APIHelper {
 	
@@ -128,6 +130,72 @@ public class APIHelper {
 			return response.getStatusLine().getStatusCode();
 
 		} catch (MalformedURLException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+/**
+ * Call http PUT API
+ * @param baseAPIUrl String
+ * @param authHeader String
+ * @param requestBody String
+ * @return String
+ * @throws Exception
+ */
+	public static String callToAPIByPut(String baseAPIUrl, String authHeader, String requestBody) throws Exception {
+		try {
+
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			HttpPut putRequest = new HttpPut(baseAPIUrl);
+
+			StringEntity input = new StringEntity(requestBody);
+			input.setContentType("application/json");
+			putRequest.setEntity(input);
+
+			if (null != authHeader) {
+				putRequest.addHeader("Authorization", authHeader);
+			}
+
+			HttpResponse response = httpClient.execute(putRequest);
+
+			return processApiResponse(response);
+
+		} catch (MalformedURLException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+/**
+ * Call http GET API and return the raw response body bytes.
+ * Use for binary responses (e.g. CSV or PDF downloads).
+ * @param baseAPIUrl String
+ * @param authHeader String
+ * @return byte[] response body
+ * @throws Exception
+ */
+	public static byte[] callToAPIByGetBytes(String baseAPIUrl, String authHeader) throws Exception {
+		try {
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+
+			HttpGet getRequest = new HttpGet(baseAPIUrl);
+			getRequest.addHeader("accept", "*/*");
+
+			if (null != authHeader) {
+				getRequest.addHeader("Authorization", authHeader);
+			}
+
+			HttpResponse response = httpClient.execute(getRequest);
+			int code = response.getStatusLine().getStatusCode();
+			if (code != 200) {
+				throw new Exception("Unexpected response code: " + code);
+			}
+			return EntityUtils.toByteArray(response.getEntity());
+
+		} catch (ClientProtocolException e) {
 			throw new Exception(e);
 		} catch (IOException e) {
 			throw new Exception(e);

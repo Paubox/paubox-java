@@ -7,7 +7,7 @@ Developer context for working on this SDK.
 This repo is the official Java wrapper for two Paubox APIs:
 
 - **Paubox Email API** — send HIPAA-compliant emails, check delivery status. Requires an API key and username. Base URL: `https://api.paubox.net/v1/{API_USER}/`
-- **Paubox Forms API** — retrieve form definitions and submit responses. No API key required. Base URL: `https://apx.paubox.com/forms`
+- **Paubox Forms API** — retrieve form definitions, submit responses, and manage forms/submissions. Public respondent endpoints (get public form data, submit) need no key; management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF export) need a scoped API key with the `forms` scope. Base URL: `https://apx.paubox.com/forms`
 
 ## Project Layout
 
@@ -58,11 +58,15 @@ RECIPIENTS=recipient@example.com
 PDFFILE=src/test/testFile.pdf
 ```
 
-Additional property for forms tests:
+Additional properties for forms tests:
 
 ```
 FORM_ID=550e8400-e29b-41d4-a716-446655440000
+FORMSAPIKEY=scoped-api-key-with-forms-scope
+CUSTOMER_ID=12345
 ```
+
+`FORM_ID` is used by the public and submission-listing tests, `FORMSAPIKEY` by all forms management tests (they skip when it's absent), and `CUSTOMER_ID` by the form create/update lifecycle test.
 
 ## Architecture Patterns
 
@@ -70,7 +74,10 @@ FORM_ID=550e8400-e29b-41d4-a716-446655440000
 `EmailService` passes `"Token token=" + Constants.API_KEY` as the `Authorization` header via `APIHelper.callToAPIByGet` / `callToAPIByPost`. Responses are JSON — deserialize with Jackson `ObjectMapper` using `FAIL_ON_UNKNOWN_PROPERTIES = false`.
 
 ### Public endpoints (Forms API)
-`FormsService` passes `null` for the auth header (already handled by `APIHelper`). The submit endpoint returns HTTP 201 with an empty body, so it uses `APIHelper.callToAPIByPostReturnCode` which returns the status code as an int instead of the body string.
+For the respondent endpoints (`getForm`, `submitForm`), `FormsService` passes `null` for the auth header (already handled by `APIHelper`). The submit endpoint returns HTTP 201 with an empty body, so it uses `APIHelper.callToAPIByPostReturnCode` which returns the status code as an int instead of the body string.
+
+### Scoped-key endpoints (Forms API management)
+All other Forms methods pass `"Bearer " + apiKey` as the `Authorization` header. The key is a scoped API key with the `forms` scope, held in a `private final String apiKey` field on `FormsService`: `new FormsService(String apiKey)` sets it explicitly, and the no-arg constructor falls back to `Constants.FORMS_API_KEY` (loaded by `ConfigurationManager` from the `FORMSAPIKEY` property). A missing key only fails when an authenticated method is called. Binary exports (CSV/PDF) use `APIHelper.callToAPIByGetBytes`, which returns `byte[]`; `updateForm` uses `APIHelper.callToAPIByPut`.
 
 ### Adding a new endpoint
 1. Add a response DTO in `src/com/paubox/data/` — use `@JsonProperty` for snake_case fields.

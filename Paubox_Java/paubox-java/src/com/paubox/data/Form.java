@@ -20,16 +20,24 @@ public class Form {
     @JsonProperty("vanity_url")
     private String vanityUrl;
 
+    @JsonProperty("old_form_id")
+    private Integer oldFormId;
+
     private int version;
     private boolean active;
 
     @JsonProperty("customer_id")
     private int customerId;
 
+    private String recipient;
+
     private boolean signable;
 
     @JsonProperty("signature_confirmation_label")
     private String signatureConfirmationLabel;
+
+    @JsonProperty("subscription_list_id")
+    private String subscriptionListId;
 
     @JsonProperty("submission_count")
     private int submissionCount;
@@ -65,6 +73,9 @@ public class Form {
     public String getVanityUrl() { return vanityUrl; }
     public void setVanityUrl(String vanityUrl) { this.vanityUrl = vanityUrl; }
 
+    public Integer getOldFormId() { return oldFormId; }
+    public void setOldFormId(Integer oldFormId) { this.oldFormId = oldFormId; }
+
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }
 
@@ -74,12 +85,20 @@ public class Form {
     public int getCustomerId() { return customerId; }
     public void setCustomerId(int customerId) { this.customerId = customerId; }
 
+    public String getRecipient() { return recipient; }
+    public void setRecipient(String recipient) { this.recipient = recipient; }
+
     public boolean isSignable() { return signable; }
     public void setSignable(boolean signable) { this.signable = signable; }
 
     public String getSignatureConfirmationLabel() { return signatureConfirmationLabel; }
     public void setSignatureConfirmationLabel(String signatureConfirmationLabel) {
         this.signatureConfirmationLabel = signatureConfirmationLabel;
+    }
+
+    public String getSubscriptionListId() { return subscriptionListId; }
+    public void setSubscriptionListId(String subscriptionListId) {
+        this.subscriptionListId = subscriptionListId;
     }
 
     public int getSubmissionCount() { return submissionCount; }
