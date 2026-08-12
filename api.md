@@ -112,21 +112,45 @@ GetEmailDispositionResponse response = email.getEmailDisposition(sourceTrackingI
 ## Forms API
 
 Base URL: `https://apx.paubox.com/forms`  
-Authentication: **None required**
+Authentication: **None** for respondent endpoints (`getForm`, `submitForm`); **scoped API key** for all other methods
+
+#### Authentication
+
+Respondent endpoints (`getForm`, `submitForm`) are public — no credentials needed.
+
+All other Forms methods (management endpoints) require a **scoped API key** with the `forms` scope, created in the Paubox admin dashboard. The SDK sends it as `Authorization: Bearer {FORMS_API_KEY}`. Calling a management method without a key throws `Exception`.
 
 ### Setup
+
+Respondent endpoints (public):
 
 ```java
 FormsInterface forms = new FormsService();
 ```
 
-No credentials needed — these endpoints are public.
+Management endpoints — pass the scoped API key explicitly:
+
+```java
+FormsInterface forms = new FormsService("your-scoped-api-key");
+```
+
+...or set `FORMSAPIKEY` in `config.properties` and use the no-arg constructor:
+
+```java
+ConfigurationManager.getProperties("/path/to/config.properties");
+FormsInterface forms = new FormsService();
+```
+
+`config.properties` (only needed for management endpoints):
+```
+FORMSAPIKEY=your-scoped-api-key
+```
 
 ---
 
 ### getForm
 
-Retrieve the full definition of a form (HTML, JSON schema, CSS).
+Retrieve the full definition of a form (HTML, JSON schema, CSS). Public — no API key. Only returns active, non-archived forms; use [`getFormById`](#getformbyid) to fetch a form regardless of state.
 
 ```java
 Form form = forms.getForm("550e8400-e29b-41d4-a716-446655440000");
@@ -152,10 +176,13 @@ Form form = forms.getForm("550e8400-e29b-41d4-a716-446655440000");
 | `version` | `int` | Schema version |
 | `active` | `boolean` | Whether the form accepts submissions |
 | `customerId` | `int` | Owning customer ID |
+| `recipient` | `String` | Comma-separated emails notified on submission |
 | `signable` | `boolean` | Whether the form has a signature field |
 | `signatureConfirmationLabel` | `String` | Label for signature confirmation |
 | `submissionCount` | `int` | Total submissions received |
-| `type` | `String` | Optional form type |
+| `type` | `String` | Optional form type (e.g. `marketing_form`) |
+| `subscriptionListId` | `String` | Optional marketing subscription list ID |
+| `oldFormId` | `Integer` | Legacy form ID, if migrated |
 | `deleted` | `boolean` | Whether the form is soft-deleted |
 | `archived` | `boolean` | Whether the form is archived |
 | `createdAt` | `String` | ISO 8601 creation timestamp |
@@ -167,7 +194,7 @@ Throws `IOException` if the form is not found (404).
 
 ### submitForm
 
-Submit a respondent's answers for a form. On success the service stores the submission, increments the form's submission count, and emails recipients if configured.
+Submit a respondent's answers for a form. Public — no API key. On success the service stores the submission, increments the form's submission count, and emails recipients if configured.
 
 ```java
 Map<String, Object> data = new HashMap<>();
@@ -219,3 +246,318 @@ forms.submitForm(formId, submission);
 ```
 
 Returns `void` on success (HTTP 201). Throws `Exception` on 400 (missing `form_data`) or 404 (form not found).
+
+---
+
+### listForms
+
+Requires a scoped API key. List forms with optional filtering and pagination.
+
+```java
+FormListResponse response = forms.listForms(query);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `query` | `FormListRequest` | Filters/pagination; `customerId` is required when authenticating with a scoped API key |
+
+**FormListRequest fields** (sent as query parameters, not JSON)
+
+| Field | Type | Description |
+|---|---|---|
+| `customerId` | `Integer` | Customer ID to list forms for. **Required with a scoped API key** — must equal the key's customer id, otherwise the API returns `403 Forbidden` |
+| `formId` | `String` | Filter to a single form UUID |
+| `search` | `String` | Substring match against title/description |
+| `order` | `String` | `asc` or `desc` (default `desc`) |
+| `orderBy` | `String` | `title`, `updated_at`, or `submission_count` (default `created_at`) |
+| `archived` | `Boolean` | Filter by archived state |
+| `active` | `Boolean` | Filter by active state |
+| `page` | `Integer` | Page number (default 1) |
+| `items` | `Integer` | Items per page (default 50, max 100) |
+
+**FormListResponse fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `results` | `List<Form>` | The forms on this page |
+| `pageInfo` | `PageInfo` | Pagination metadata |
+
+**PageInfo fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `count` | `long` | Total matching forms |
+| `pages` | `int` | Total pages |
+| `page` | `int` | Current page |
+| `items` | `int` | Items per page |
+
+---
+
+### createForm
+
+Requires a scoped API key. Create a new form. Returns the new form's UUID.
+
+```java
+String newFormId = forms.createForm(request);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `request` | `CreateFormRequest` | The form to create |
+
+**CreateFormRequest fields**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `title` | `String` | Yes | Form title |
+| `formJson` | `Object` | Yes | JSON schema of the form fields |
+| `customerId` | `Integer` | Yes | Owning customer ID |
+| `version` | `Integer` | Yes | Schema version |
+| `description` | `String` | No | Description |
+| `formHtml` | `String` | No | Rendered HTML of the form |
+| `formCss` | `String` | No | Custom CSS |
+| `recipient` | `String` | No | Comma-separated emails notified on submission |
+| `signable` | `Boolean` | No | Whether the form has a signature field |
+| `signatureConfirmationLabel` | `String` | No | Label for signature confirmation |
+| `subscriptionListId` | `String` | No | Marketing subscription list ID |
+| `type` | `String` | No | Form type (e.g. `marketing_form`) |
+| `active` | `Boolean` | No | Whether the form accepts submissions |
+| `submissionCount` | `Integer` | No | Initial submission count |
+
+The convenience constructor `CreateFormRequest(String title, Object formJson, Integer customerId, Integer version)` sets the four required fields.
+
+Throws `Exception` if `request`, `title`, `formJson`, `customerId`, or `version` is missing.
+
+---
+
+<a name="getformbyid"></a>
+### getFormById
+
+Requires a scoped API key. Retrieve a form by ID regardless of its active/archived state (unlike the public `getForm`).
+
+```java
+Form form = forms.getFormById(formId);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form |
+
+Returns a `Form` (same fields as [`getForm`](#getform)). Throws `IOException` if the form is not found (404).
+
+---
+
+### updateForm
+
+Requires a scoped API key. Update a form. PATCH semantics: fields left `null` on the request stay unchanged.
+
+```java
+UpdateFormResponse response = forms.updateForm(formId, request);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form to update |
+| `request` | `UpdateFormRequest` | Fields to change (null = leave unchanged) |
+
+**UpdateFormRequest fields** (all optional)
+
+| Field | Type | Description |
+|---|---|---|
+| `title` | `String` | New title |
+| `description` | `String` | New description |
+| `formJson` | `Object` | New JSON schema |
+| `vanityUrl` | `String` | New vanity URL slug |
+| `recipient` | `String` | Comma-separated notification emails |
+| `active` | `Boolean` | Enable/disable submissions |
+| `subscriptionListId` | `String` | Marketing subscription list ID |
+
+**UpdateFormResponse fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `detail` | `String` | e.g. `"Form updated successfully"` |
+| `formId` | `String` | UUID of the updated form |
+
+Throws `IOException` if the form is not found (404).
+
+---
+
+### archiveForm / unarchiveForm
+
+Requires a scoped API key. Archive or unarchive a form. No request body; returns `void`.
+
+```java
+forms.archiveForm(formId);
+forms.unarchiveForm(formId);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form |
+
+Throws `IOException` on error (e.g. form not found).
+
+---
+
+### copyForm
+
+Requires a scoped API key. Duplicate an existing form under a new title. Returns the full new `Form`.
+
+```java
+Form copy = forms.copyForm(formId, "New title");
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the source form |
+| `newTitle` | `String` | Title for the copy |
+
+Throws `IOException` if the source form is not found (404).
+
+---
+
+### getFormStats
+
+Requires a scoped API key. Get aggregate form/submission counts.
+
+```java
+FormStats stats = forms.getFormStats(null);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `customerId` | `Integer` | Optional customer ID; `null` uses the API key's customer |
+
+**FormStats fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `activeFormCount` | `long` | Number of active forms |
+| `totalSubmissionCount` | `long` | Total submissions across forms |
+| `submissionsLast7Days` | `long` | Submissions in the last 7 days |
+
+---
+
+### listFormSubmissions
+
+Requires a scoped API key. List a form's submissions with optional filtering and pagination.
+
+```java
+FormSubmissionListResponse response = forms.listFormSubmissions(formId, query);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form |
+| `query` | `FormSubmissionListRequest` | Optional filters/pagination; pass `null` for all defaults |
+
+**FormSubmissionListRequest fields** (all optional; sent as query parameters, not JSON)
+
+| Field | Type | Description |
+|---|---|---|
+| `submissionId` | `String` | Filter to a single submission |
+| `order` | `String` | `asc` or `desc` |
+| `orderBy` | `String` | `submitter_email` (default `created_at`) |
+| `page` | `Integer` | Page number (default 1) |
+| `items` | `Integer` | Items per page (default 50, max 100) |
+
+**FormSubmissionListResponse fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `data` | `List<FormSubmission>` | The submissions on this page |
+| `total` | `long` | Total matching submissions |
+| `page` | `int` | Current page |
+| `items` | `int` | Items per page |
+
+**FormSubmission fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `String` | Submission UUID |
+| `formId` | `String` | UUID of the form |
+| `formData` | `String` | The submission's answers as a JSON string |
+| `storageType` | `String` | Where the submission is stored |
+| `storageUrl` | `String` | Storage URL (nullable) |
+| `submitterEmail` | `String` | Respondent's email (nullable) |
+| `recipients` | `String` | Notified recipients (nullable) |
+| `attachment` | `String` | Attachment reference (nullable) |
+| `attachmentName` | `String` | Attachment filename (nullable) |
+| `attachmentUrl` | `String` | Attachment URL (nullable) |
+| `attachmentType` | `String` | Attachment MIME type (nullable) |
+| `createdAt` | `String` | ISO 8601 creation timestamp |
+
+Throws `IOException` if the form is not found (404).
+
+---
+
+### downloadSubmissionsCsv
+
+Requires a scoped API key. Download all of a form's submissions as CSV. Returns the raw `text/csv` bytes.
+
+```java
+byte[] csv = forms.downloadSubmissionsCsv(formId);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form |
+
+Throws `Exception` on a non-200 response.
+
+---
+
+### downloadSubmissionCsv
+
+Requires a scoped API key. Download a single submission as CSV. Returns the raw `text/csv` bytes.
+
+```java
+byte[] csv = forms.downloadSubmissionCsv(formId, submissionId);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form |
+| `submissionId` | `String` | UUID of the submission |
+
+Throws `Exception` on a non-200 response.
+
+---
+
+### downloadSubmissionPdf
+
+Requires a scoped API key. Download a single submission as PDF. Returns the raw `application/pdf` bytes.
+
+```java
+byte[] pdf = forms.downloadSubmissionPdf(formId, submissionId);
+```
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `formId` | `String` | UUID of the form |
+| `submissionId` | `String` | UUID of the submission |
+
+Throws `Exception` on a non-200 response.

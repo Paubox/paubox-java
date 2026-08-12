@@ -15,6 +15,8 @@ The API wrapper allows you to construct and send messages.
   * [Sending messages](#sending-messages)
   * [Checking Email Dispositions](#checking-email-dispositions)
   * [Paubox Forms](#paubox-forms)
+    * [Respondent endpoints](#forms-respondent-endpoints)
+    * [Forms management](#forms-management)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -232,9 +234,32 @@ static void GetEmailDisposition()
 <a name="paubox-forms"></a>
 ## Paubox Forms
 
-Paubox Forms is a secure form product included with Paubox Email Suite. The Forms API requires **no API key** — the endpoints are public and called on behalf of form respondents.
+Paubox Forms is a secure form product included with Paubox Email Suite. The Forms API has two kinds of endpoints:
 
-### Getting a form definition
+- **Respondent endpoints** — getting a form's public definition and submitting a response require **no API key**. They are public and called on behalf of form respondents.
+- **Forms management endpoints** — listing, creating, updating, archiving, and copying forms, plus stats and reading/exporting submissions, require a **scoped API key** with the `forms` scope, created in the Paubox admin dashboard.
+
+Pass the scoped API key either explicitly:
+
+```java
+FormsInterface forms = new FormsService("Your-Scoped-API-Key-Here");
+```
+
+or via the `FORMSAPIKEY` property in your configuration file, then use the no-arg constructor:
+
+```java
+FORMSAPIKEY: Your-Scoped-API-Key-Here
+```
+
+```java
+ConfigurationManager.getProperties("/path/to/config.properties");
+FormsInterface forms = new FormsService();
+```
+
+<a name="forms-respondent-endpoints"></a>
+### Respondent endpoints
+
+#### Getting a form definition
 
 Retrieve a form's HTML, JSON schema, and CSS before rendering it:
 
@@ -252,7 +277,7 @@ static Form GetForm(String formId) throws Exception {
 }
 ```
 
-### Submitting a form response
+#### Submitting a form response
 
 Submit a respondent's answers. The `formData` keys must match the field names in the form's JSON schema (`form.getFormJson()`):
 
@@ -275,7 +300,7 @@ static void SubmitForm(String formId) throws Exception {
 }
 ```
 
-### Submitting with file attachments
+#### Submitting with file attachments
 
 ```java
 import com.paubox.data.FormSubmissionAttachment;
@@ -306,6 +331,184 @@ static void SubmitFormWithAttachment(String formId) throws Exception {
 ```
 
 Maximum submission size is **250 MB** to accommodate file attachments.
+
+<a name="forms-management"></a>
+### Forms management
+
+All of the methods below require a **scoped API key** with the `forms` scope. Construct the service with `new FormsService(apiKey)`, or set the `FORMSAPIKEY` property and use `new FormsService()`.
+
+#### Listing forms
+
+List your forms with optional filtering and pagination. When authenticating with a scoped API key, `customerId` must be set to your own Paubox customer id — omitting it results in a `403 Forbidden` from the API. The other filters are optional (defaults: page 1, 50 items, newest first):
+
+```java
+import com.paubox.data.Form;
+import com.paubox.data.FormListRequest;
+import com.paubox.data.FormListResponse;
+import com.paubox.service.FormsInterface;
+import com.paubox.service.FormsService;
+
+static void ListForms() throws Exception {
+    FormListRequest query = new FormListRequest();
+    query.setCustomerId(12345); // your Paubox customer id — required with a scoped API key
+    query.setSearch("intake");
+    query.setOrderBy("updated_at");
+    query.setOrder("desc");
+    query.setPage(1);
+    query.setItems(25);
+
+    FormsInterface forms = new FormsService();
+    FormListResponse response = forms.listForms(query);
+
+    for (Form form : response.getResults()) {
+        System.out.println(form.getId() + " - " + form.getTitle());
+    }
+    System.out.println("Total forms: " + response.getPageInfo().getCount()
+            + ", pages: " + response.getPageInfo().getPages());
+}
+```
+
+#### Creating a form
+
+`title`, `formJson`, `customerId`, and `version` are required; everything else is optional. Returns the new form's id:
+
+```java
+import com.paubox.data.CreateFormRequest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+static String CreateForm() throws Exception {
+    Map<String, Object> formJson = new HashMap<>();
+    formJson.put("body", new ArrayList<Object>());
+
+    CreateFormRequest request = new CreateFormRequest("Patient Intake", formJson, 12345, 1);
+    request.setDescription("New patient intake form");
+    request.setRecipient("intake@yourdomain.com");
+    request.setActive(true);
+
+    FormsInterface forms = new FormsService();
+    String newFormId = forms.createForm(request);
+    return newFormId;
+}
+```
+
+#### Getting a form by id (authenticated)
+
+Unlike the public `getForm`, the authenticated `getFormById` returns the form even when it is inactive or archived:
+
+```java
+static Form GetFormById(String formId) throws Exception {
+    FormsInterface forms = new FormsService();
+    return forms.getFormById(formId);
+}
+```
+
+#### Updating a form
+
+Updates have PATCH semantics — any field you leave `null` on the request stays unchanged:
+
+```java
+import com.paubox.data.UpdateFormRequest;
+import com.paubox.data.UpdateFormResponse;
+
+static void UpdateForm(String formId) throws Exception {
+    UpdateFormRequest request = new UpdateFormRequest();
+    request.setTitle("Patient Intake (v2)");
+    request.setActive(true);
+
+    FormsInterface forms = new FormsService();
+    UpdateFormResponse response = forms.updateForm(formId, request);
+    System.out.println(response.getDetail());
+}
+```
+
+#### Archiving and unarchiving a form
+
+```java
+static void ArchiveAndRestoreForm(String formId) throws Exception {
+    FormsInterface forms = new FormsService();
+    forms.archiveForm(formId);
+    forms.unarchiveForm(formId);
+}
+```
+
+#### Copying a form
+
+Duplicate an existing form under a new title. Returns the full new Form:
+
+```java
+static Form CopyForm(String formId) throws Exception {
+    FormsInterface forms = new FormsService();
+    Form copy = forms.copyForm(formId, "Patient Intake (copy)");
+    return copy;
+}
+```
+
+#### Form stats
+
+Get aggregate counts for your forms. Pass `null` to use the customer associated with your API key, or an explicit customer id:
+
+```java
+import com.paubox.data.FormStats;
+
+static void GetFormStats() throws Exception {
+    FormsInterface forms = new FormsService();
+    FormStats stats = forms.getFormStats(null);
+    System.out.println("Active forms: " + stats.getActiveFormCount());
+    System.out.println("Total submissions: " + stats.getTotalSubmissionCount());
+    System.out.println("Submissions in the last 7 days: " + stats.getSubmissionsLast7Days());
+}
+```
+
+#### Listing form submissions
+
+List a form's submissions with optional filtering and pagination. Pass `null` instead of a `FormSubmissionListRequest` to use all defaults:
+
+```java
+import com.paubox.data.FormSubmission;
+import com.paubox.data.FormSubmissionListRequest;
+import com.paubox.data.FormSubmissionListResponse;
+
+static void ListFormSubmissions(String formId) throws Exception {
+    FormSubmissionListRequest query = new FormSubmissionListRequest();
+    query.setOrder("desc");
+    query.setItems(20);
+
+    FormsInterface forms = new FormsService();
+    FormSubmissionListResponse response = forms.listFormSubmissions(formId, query);
+
+    for (FormSubmission submission : response.getData()) {
+        System.out.println(submission.getId() + " - " + submission.getSubmitterEmail());
+    }
+    System.out.println("Total submissions: " + response.getTotal());
+}
+```
+
+#### Downloading submissions as CSV or PDF
+
+Export all of a form's submissions (or a single submission) as CSV, or a single submission as PDF. The methods return the raw file bytes:
+
+```java
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+static void DownloadSubmissions(String formId, String submissionId) throws Exception {
+    FormsInterface forms = new FormsService();
+
+    // All submissions of a form, as CSV
+    byte[] csv = forms.downloadSubmissionsCsv(formId);
+    Files.write(Paths.get("submissions.csv"), csv);
+
+    // A single submission, as CSV
+    byte[] oneCsv = forms.downloadSubmissionCsv(formId, submissionId);
+    Files.write(Paths.get("submission.csv"), oneCsv);
+
+    // A single submission, as PDF
+    byte[] pdf = forms.downloadSubmissionPdf(formId, submissionId);
+    Files.write(Paths.get("submission.pdf"), pdf);
+}
+```
 
 <a name="#contributing"></a>
 ## Contributing
