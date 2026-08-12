@@ -130,6 +130,65 @@ public class TestFormsService {
         new FormsService("").listForms(null);
     }
 
+    // Regression tests: caller-supplied UUID args must be validated before any HTTP call
+    // (paubox-java QA gate 2026-08-12 — same class as paubox-python3 #10 and paubox-php #16).
+
+    private static final String HOSTILE_DOT_DOT = "../../etc/passwd";
+    private static final String HOSTILE_QUERY = "11111111-1111-1111-1111-111111111111?admin=1";
+    private static final String HOSTILE_FRAGMENT = "11111111-1111-1111-1111-111111111111#frag";
+
+    @Test(expected = Exception.class)
+    public void testGetFormByIdRejectsHostileFormId() throws Exception {
+        new FormsService("unused-key").getFormById(HOSTILE_DOT_DOT);
+    }
+
+    @Test(expected = Exception.class)
+    public void testGetFormByIdRejectsQuerySplice() throws Exception {
+        new FormsService("unused-key").getFormById(HOSTILE_QUERY);
+    }
+
+    @Test(expected = Exception.class)
+    public void testGetFormByIdRejectsFragmentSplice() throws Exception {
+        new FormsService("unused-key").getFormById(HOSTILE_FRAGMENT);
+    }
+
+    @Test(expected = Exception.class)
+    public void testUpdateFormRejectsHostileFormId() throws Exception {
+        new FormsService("unused-key").updateForm(HOSTILE_DOT_DOT, new UpdateFormRequest());
+    }
+
+    @Test(expected = Exception.class)
+    public void testArchiveFormRejectsHostileFormId() throws Exception {
+        new FormsService("unused-key").archiveForm(HOSTILE_DOT_DOT);
+    }
+
+    @Test(expected = Exception.class)
+    public void testUnarchiveFormRejectsHostileFormId() throws Exception {
+        new FormsService("unused-key").unarchiveForm(HOSTILE_DOT_DOT);
+    }
+
+    @Test(expected = Exception.class)
+    public void testListFormSubmissionsRejectsHostileFormId() throws Exception {
+        new FormsService("unused-key").listFormSubmissions(HOSTILE_DOT_DOT, null);
+    }
+
+    @Test(expected = Exception.class)
+    public void testDownloadSubmissionsCsvRejectsHostileFormId() throws Exception {
+        new FormsService("unused-key").downloadSubmissionsCsv(HOSTILE_DOT_DOT);
+    }
+
+    @Test(expected = Exception.class)
+    public void testDownloadSubmissionCsvRejectsHostileSubmissionId() throws Exception {
+        new FormsService("unused-key").downloadSubmissionCsv(
+                "11111111-1111-1111-1111-111111111111", HOSTILE_DOT_DOT);
+    }
+
+    @Test(expected = Exception.class)
+    public void testDownloadSubmissionPdfRejectsHostileSubmissionId() throws Exception {
+        new FormsService("unused-key").downloadSubmissionPdf(
+                "11111111-1111-1111-1111-111111111111", HOSTILE_DOT_DOT);
+    }
+
     @Test
     public void testFormLifecycle() throws Exception {
         if (formsApiKey == null || formsApiKey.isEmpty()) return;

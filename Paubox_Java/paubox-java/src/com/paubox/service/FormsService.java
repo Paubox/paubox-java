@@ -2,6 +2,7 @@ package com.paubox.service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paubox.common.Constants;
@@ -22,6 +23,7 @@ import com.paubox.data.UpdateFormResponse;
 public class FormsService implements FormsInterface {
 
     private static final String FORMS_BASE_URL = "https://apx.paubox.com/forms";
+    private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
     private final String apiKey;
 
@@ -107,7 +109,7 @@ public class FormsService implements FormsInterface {
     }
 
     public Form getFormById(String formId) throws Exception {
-        validateId(formId, "formId");
+        validateUuid(formId, "formId");
         String url = FORMS_BASE_URL + "/api/forms/" + formId;
         String responseStr = APIHelper.callToAPIByGet(url, authHeader());
         ObjectMapper mapper = new ObjectMapper();
@@ -120,7 +122,7 @@ public class FormsService implements FormsInterface {
     }
 
     public UpdateFormResponse updateForm(String formId, UpdateFormRequest request) throws Exception {
-        validateId(formId, "formId");
+        validateUuid(formId, "formId");
         if (request == null) {
             throw new Exception("UpdateFormRequest cannot be null.");
         }
@@ -137,13 +139,13 @@ public class FormsService implements FormsInterface {
     }
 
     public void archiveForm(String formId) throws Exception {
-        validateId(formId, "formId");
+        validateUuid(formId, "formId");
         String url = FORMS_BASE_URL + "/api/forms/" + formId + "/archive";
         postWithoutBody(url);
     }
 
     public void unarchiveForm(String formId) throws Exception {
-        validateId(formId, "formId");
+        validateUuid(formId, "formId");
         String url = FORMS_BASE_URL + "/api/forms/" + formId + "/unarchive";
         postWithoutBody(url);
     }
@@ -180,7 +182,7 @@ public class FormsService implements FormsInterface {
     }
 
     public FormSubmissionListResponse listFormSubmissions(String formId, FormSubmissionListRequest query) throws Exception {
-        validateId(formId, "formId");
+        validateUuid(formId, "formId");
         StringBuilder queryString = new StringBuilder();
         if (query != null) {
             appendParam(queryString, "submission_id", query.getSubmissionId());
@@ -201,21 +203,21 @@ public class FormsService implements FormsInterface {
     }
 
     public byte[] downloadSubmissionsCsv(String formId) throws Exception {
-        validateId(formId, "formId");
+        validateUuid(formId, "formId");
         String url = FORMS_BASE_URL + "/api/forms/" + formId + "/submissions/submission-csv";
         return APIHelper.callToAPIByGetBytes(url, authHeader());
     }
 
     public byte[] downloadSubmissionCsv(String formId, String submissionId) throws Exception {
-        validateId(formId, "formId");
-        validateId(submissionId, "submissionId");
+        validateUuid(formId, "formId");
+        validateUuid(submissionId, "submissionId");
         String url = FORMS_BASE_URL + "/api/forms/" + formId + "/submissions/submission-csv/" + submissionId;
         return APIHelper.callToAPIByGetBytes(url, authHeader());
     }
 
     public byte[] downloadSubmissionPdf(String formId, String submissionId) throws Exception {
-        validateId(formId, "formId");
-        validateId(submissionId, "submissionId");
+        validateUuid(formId, "formId");
+        validateUuid(submissionId, "submissionId");
         String url = FORMS_BASE_URL + "/api/forms/" + formId + "/submissions/" + submissionId + "/submission-pdf";
         return APIHelper.callToAPIByGetBytes(url, authHeader());
     }
@@ -241,6 +243,15 @@ public class FormsService implements FormsInterface {
     private static void validateId(String value, String name) throws Exception {
         if (value == null || value.isEmpty()) {
             throw new Exception(name + " cannot be null or empty.");
+        }
+    }
+
+    private static void validateUuid(String value, String name) throws Exception {
+        if (value == null || value.isEmpty()) {
+            throw new Exception(name + " cannot be null or empty.");
+        }
+        if (!UUID_PATTERN.matcher(value).matches()) {
+            throw new Exception(name + " must be a valid UUID (8-4-4-4-12 hex).");
         }
     }
 
