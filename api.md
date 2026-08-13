@@ -2,7 +2,7 @@
 
 ## Email API
 
-Base URL: `https://api.paubox.net/v1/{API_USER}/`  
+Base URL: `https://api.paubox.com/v1/`  
 Authentication: `Authorization: Token token={API_KEY}`
 
 ### Setup
@@ -15,7 +15,6 @@ EmailInterface email = new EmailService();
 `config.properties` must contain:
 ```
 APIKEY=your-api-key
-APIUSER=your-api-username
 ```
 
 ---
@@ -111,7 +110,7 @@ GetEmailDispositionResponse response = email.getEmailDisposition(sourceTrackingI
 
 ## Forms API
 
-Base URL: `https://apx.paubox.com/forms`  
+Base URL: `https://api.paubox.com/forms`  
 Authentication: **None** for respondent endpoints (`getForm`, `submitForm`); **scoped API key** for all other methods
 
 #### Authentication

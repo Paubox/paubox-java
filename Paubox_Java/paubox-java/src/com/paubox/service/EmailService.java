@@ -15,7 +15,7 @@ import org.json.simple.JSONArray;
 
 public class EmailService implements EmailInterface {
 
-	private String baseApiUrl = "https://api.paubox.net/v1/" + Constants.API_USER + "/";
+	private String baseApiUrl = "https://api.paubox.com/v1/";
 
 	public GetEmailDispositionResponse getEmailDisposition(String sourceTrackingId) throws Exception {
 		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId;
