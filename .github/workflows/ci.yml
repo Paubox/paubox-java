@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: Paubox_Java/paubox-java
+
+jobs:
+  build:
+    name: build (jdk ${{ matrix.jdk }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: ["11", "17", "21"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.jdk }}
+          cache: maven
+
+      - name: Compile the SDK
+        run: mvn -B --no-transfer-progress compile
+
+      - name: Compile the test sources
+        # Compiled but not executed: every test here reads config.properties and
+        # calls the live API. Compiling them catches signature drift between the
+        # SDK and its own tests, which nothing checked before.
+        run: mvn -B --no-transfer-progress test-compile
+
+      - name: Assert the build produced classes
+        # "Nothing to compile" also exits 0, so a green build is not by itself
+        # evidence that anything was built. Floors, not targets.
+        run: |
+          main=$(find target/classes -name '*.class' | wc -l)
+          tests=$(find target/test-classes -name '*.class' | wc -l)
+          echo "main_classes=$main test_classes=$tests"
+          if [ "$main" -lt 30 ] || [ "$tests" -lt 3 ]; then
+            echo "FAIL: expected at least 30 main and 3 test classes" >&2
+            exit 1
+          fi
+          echo "OK: compiled $main main and $tests test classes"
