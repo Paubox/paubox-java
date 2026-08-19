@@ -5,6 +5,9 @@
   <version>1.2</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
+    <!-- Test sources are excluded from the main compile below; pointing Maven
+         at them lets `test-compile` catch drift between the SDK and its tests. -->
+    <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -16,6 +19,17 @@
         </configuration>
       </plugin>
       
+      <!-- Every test in src/test calls the live API and needs config.properties,
+           so they are not run as part of a build. Set -DskipTests=false to run
+           them deliberately with credentials present. -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+
       <!-- Maven Assembly Plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
