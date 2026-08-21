@@ -93,3 +93,25 @@ All other Forms methods pass `"Bearer " + apiKey` as the `Authorization` header.
 | Jackson Databind | 2.13.2.1 | JSON serialization |
 | JSON Simple | 1.1.1 | Request body building (email only) |
 | JUnit | 4.13.1 | Tests |
+
+## Releases
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Merging to `master` refreshes a standing release PR; merging *that* PR bumps `version.txt` and the `<version>` in `Paubox_Java/paubox-java/pom.xml`, writes `CHANGELOG.md`, creates a bare `vX.Y.Z` tag and a GitHub release, and **attaches a freshly built jar to that release**.
+
+Do **not** hand-edit the pom version, `version.txt`, or `CHANGELOG.md` — release-please owns all three.
+
+The next version comes from PR titles: `feat:` gives a minor bump, `fix:` a patch, and a `!` suffix or a `BREAKING CHANGE:` footer gives a major. `.github/workflows/pr-title.yml` rejects titles release-please cannot parse.
+
+### Not published to a registry
+
+This SDK is **not on Maven Central**, and publishing is deliberately out of scope. The `groupId`/`artifactId` are still `Paubox`/`Paubox`, which Central would reject — changing them to reverse-DNS coordinates is part of the publishing work, not this.
+
+Until then the GitHub release *is* the distribution channel. The jar committed under `stable-jar-file/` was last rebuilt in **November 2019** and predates all of the Forms API work; prefer the jar attached to the latest release.
+
+### Two configuration details that fail silently if changed
+
+**The pom XPath must stay namespace-agnostic.** The pom declares `xmlns="http://maven.apache.org/POM/4.0.0"`. A plain `//project/version` matches nothing and reports no error, so a release would tag and write a changelog while leaving the pom on its old version. The config uses `/*[local-name()='project']/*[local-name()='version']`.
+
+**`CHANGELOG.md` must keep a heading matching `/\n###? v?[0-9[]/`.** That is why the staging heading is the bracketed `## [Unreleased]`. Without a match release-please prepends a second `# Changelog` title and demotes every existing heading.
+
+`release-type` is `simple`, not `maven`: the pom is not at the repository root, and the `maven` strategy rewrites it to `X.Y.Z-SNAPSHOT` after every release.

@@ -1,0 +1,103 @@
+name: release-please
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      # Maintains a release PR that bumps version.txt and the <version> in the
+      # pom, and writes CHANGELOG.md. Merging that PR creates the tag and the
+      # GitHub release, which gates the jar build below.
+      #
+      # The manifest starts at 0.0.0 because nothing has ever been released:
+      # this SDK is not on Maven Central and had no git tags. The pom's 1.2 was
+      # never published under any coordinates. The first release is pinned to
+      # 1.0.0 with a Release-As footer.
+      #
+      # release-type is `simple` rather than `maven` for two reasons: the pom
+      # is not at the repository root, and the maven strategy rewrites the pom
+      # to X.Y.Z-SNAPSHOT after every release. The pom is updated through the
+      # extra-files XML updater instead.
+      #
+      # That XPath must stay namespace-agnostic. The pom declares
+      # xmlns="http://maven.apache.org/POM/4.0.0", and a plain //project/version
+      # matches nothing and fails silently — the release would tag and write a
+      # changelog while leaving the pom on its old version.
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  attach-jar:
+    name: Attach jar to ${{ needs.release-please.outputs.tag_name }}
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Verify the tag and the pom agree
+        env:
+          RELEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
+        working-directory: Paubox_Java/paubox-java
+        run: |
+          POM_VERSION=$(mvn -B -q --no-transfer-progress \
+            help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "v${POM_VERSION}" != "${RELEASE_TAG}" ]; then
+            echo "::error::pom.xml is ${POM_VERSION} but the tag is ${RELEASE_TAG}"
+            echo "::error::If the pom was not bumped at all, check the extra-files XPath — a namespaced pom silently ignores //project/version"
+            exit 1
+          fi
+          echo "pom.xml ${POM_VERSION} matches ${RELEASE_TAG}"
+
+      - name: Build the jar
+        # -DskipTests is belt and braces; the pom already sets skipTests, since
+        # every test here reads config.properties and calls the live API.
+        # The assembly plugin is bound to `package` with finalName
+        # Paubox.Email.API, so this produces target/Paubox.Email.API.jar —
+        # the same filename the README tells users to reference.
+        working-directory: Paubox_Java/paubox-java
+        run: mvn -B --no-transfer-progress -DskipTests package
+
+      - name: Name the artifact after the release
+        env:
+          RELEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
+        working-directory: Paubox_Java/paubox-java
+        run: |
+          test -f target/Paubox.Email.API.jar
+          cp target/Paubox.Email.API.jar "Paubox.Email.API-${RELEASE_TAG}.jar"
+          ls -l "Paubox.Email.API-${RELEASE_TAG}.jar"
+
+      # There is no Maven Central publish. Attaching the jar to the release is
+      # what makes a tag useful here: the jar committed under stable-jar-file/
+      # dates from 2019 and predates every Forms commit, so this is the only
+      # current build a consumer can get without cloning and running Maven.
+      - name: Attach the jar to the GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
+        working-directory: Paubox_Java/paubox-java
+        run: gh release upload "${RELEASE_TAG}" "Paubox.Email.API-${RELEASE_TAG}.jar" --clobber
