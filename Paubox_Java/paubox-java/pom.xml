@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>Paubox</groupId>
   <artifactId>Paubox</artifactId>
-  <version>1.2</version>
+  <version>1.0.0</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <!-- Test sources are excluded from the main compile below; pointing Maven

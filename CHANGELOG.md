@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.0 (2026-08-21)
+
+
+### Features
+
+* first tagged release ([1290dde](https://github.com/Paubox/paubox-java/commit/1290dde692506a937caf44434b6a4166659a9961))
+
 ## [Unreleased]
 
 This SDK has never been published to a registry and has never carried a git
