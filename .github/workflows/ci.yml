@@ -51,3 +51,22 @@ jobs:
             exit 1
           fi
           echo "OK: compiled $main main and $tests test classes"
+
+      - name: Package the assembly jar
+        # The release workflow attaches this jar to the GitHub release, and that
+        # job only runs *after* a tag exists — so a packaging failure would be
+        # discovered with the release already cut. Building it here means the
+        # assembly is proven on every PR instead.
+        run: mvn -B --no-transfer-progress -DskipTests package
+
+      - name: Assert the jar exists and contains the SDK
+        run: |
+          jar=target/Paubox.Email.API.jar
+          test -f "$jar" || { echo "FAIL: $jar was not produced" >&2; exit 1; }
+          classes=$(unzip -l "$jar" | grep -c 'com/paubox/.*\.class' || true)
+          echo "jar=$jar classes=$classes size=$(stat -c%s "$jar")"
+          if [ "$classes" -lt 30 ]; then
+            echo "FAIL: expected at least 30 com/paubox classes in the jar" >&2
+            exit 1
+          fi
+          echo "OK: $jar contains $classes SDK classes"
