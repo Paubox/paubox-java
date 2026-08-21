@@ -31,7 +31,6 @@ public class ConfigurationManager {
 	private static void setConstants(Properties properties){
 		
 		Constants.API_KEY=properties.getProperty("APIKEY");
-		Constants.API_USER=properties.getProperty("APIUSER");
 		Constants.FORMS_API_KEY = properties.getProperty("FORMSAPIKEY");
 		
 	}

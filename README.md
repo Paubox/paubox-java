@@ -35,11 +35,10 @@ Once you have an account, follow the instructions on the Rest API dashboard to v
 
 Include your API credentials in a configuration file.
 
-Create a configuration properties file, and add the following 2 properties to this file:
+Create a configuration properties file, and add the following property to this file:
 
 ```java
 APIKEY: Your-API-Key-Here
-APIUSER: Your-Username-Here
 ```
 
 Give the path to this configuration file as input to ConfigurationManager.getProperties()

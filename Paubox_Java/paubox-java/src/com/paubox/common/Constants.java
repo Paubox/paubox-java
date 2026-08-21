@@ -4,12 +4,11 @@ public class Constants {
 
 	public static String API_KEY;
 	public static String FORMS_API_KEY;
-	public  static String API_USER;
-	
+
 	public  final static  String TYPE_GET="GET";
 	public  final static  String TYPE_POST="POST";
 	
 	public  final static  int HTTP_STATUS_SUCCESS = 200;
 
-	public  final static  String FORMS_BASE_URL = "https://apx.paubox.com/forms";
+	public  final static  String FORMS_BASE_URL = "https://api.paubox.com/forms";
 }

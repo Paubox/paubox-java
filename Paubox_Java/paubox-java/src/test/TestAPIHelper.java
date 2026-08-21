@@ -31,7 +31,7 @@ public class TestAPIHelper extends TestCase {
 			propFile = "src/test/config.properties";
 		}
 		ConfigurationManager.getProperties(propFile);
-		baseUrl = ConfigurationManager.getProperty("BASE_URL") + "/" + ConfigurationManager.getProperty("APIUSER") + "/";
+		baseUrl = ConfigurationManager.getProperty("BASE_URL") + "/";
 		authToken = "Token token=" + ConfigurationManager.getProperty("APIKEY");
 	}
 

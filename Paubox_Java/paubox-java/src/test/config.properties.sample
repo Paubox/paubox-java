@@ -1,6 +1,5 @@
 APIKEY=<put your API key for paubox here hexadecimal>
-APIUSER=<api user>
-BASE_URL=<microservice base URL>
+BASE_URL=<base URL, e.g. https://api.paubox.com/v1>
 RECIPIENTS=<test@test.com where you want the email to go to >
 PDFFILE=src/test/testFile.pdf # for pdf attachment test
 FORMSAPIKEY=<scoped API key with the forms scope - required for Forms management endpoints>
