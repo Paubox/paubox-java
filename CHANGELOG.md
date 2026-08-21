@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [Unreleased]
 
 This SDK has never been published to a registry and has never carried a git
 tag. `1.0.0` will be the first tagged release. The notes below cover the state
