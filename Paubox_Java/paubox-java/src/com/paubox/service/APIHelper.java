@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.params.ClientPNames;
@@ -172,6 +173,31 @@ public class APIHelper {
 			}
 
 			HttpResponse response = httpClient.execute(putRequest);
+
+			return processApiResponse(response);
+
+		} catch (MalformedURLException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+	public static String callToAPIByPatch(String baseAPIUrl, String authHeader, String requestBody) throws Exception {
+		try {
+
+			DefaultHttpClient httpClient = newClient();
+			HttpPatch patchRequest = new HttpPatch(baseAPIUrl);
+
+			StringEntity input = new StringEntity(requestBody);
+			input.setContentType("application/json");
+			patchRequest.setEntity(input);
+
+			if (null != authHeader) {
+				patchRequest.addHeader("Authorization", authHeader);
+			}
+
+			HttpResponse response = httpClient.execute(patchRequest);
 
 			return processApiResponse(response);
 
