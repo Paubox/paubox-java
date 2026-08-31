@@ -29,7 +29,7 @@ public class EmailService implements EmailInterface {
 			 throw new IOException(responseStr);
          }
 
-         if (response != null && response.getData() != null && response.getData().getMessage() != null
+         if (response.getData() != null && response.getData().getMessage() != null
              && response.getData().getMessage().getMessage_deliveries() != null &&
              response.getData().getMessage().getMessage_deliveries().size() > 0)
          {
@@ -60,9 +60,8 @@ public class EmailService implements EmailInterface {
 	private String formatMessage(Message message) throws Exception{
 						
 		JSONObject messageJSON = new JSONObject();		
-		JSONObject contentJSON = null;
-		JSONObject headerJSON = null;
-		JSONObject attachmentJSON = null;		
+		JSONObject contentJSON;
+		JSONObject headerJSON;
         JSONObject requestJSON = new JSONObject();
         JSONObject dataJSON = new JSONObject();
         JSONArray attachmentJSONArray = new JSONArray();
@@ -93,7 +92,7 @@ public class EmailService implements EmailInterface {
         if (message.getAttachments() != null && message.getAttachments().size() > 0) {        	           
             for (Attachment attachment : message.getAttachments())
             {
-            	attachmentJSON = new JSONObject();
+            	JSONObject attachmentJSON = new JSONObject();
             	attachmentJSON.put("fileName" , attachment.getFileName());
             	attachmentJSON.put("contentType" , attachment.getContentType());
             	attachmentJSON.put("content" , attachment.getContent());
