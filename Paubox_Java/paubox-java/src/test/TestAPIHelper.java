@@ -5,8 +5,6 @@ package test;
 
 import com.paubox.config.ConfigurationManager;
 import org.apache.http.client.ClientProtocolException;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.paubox.service.APIHelper;

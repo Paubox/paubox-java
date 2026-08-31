@@ -114,7 +114,7 @@ public class TestEmailService {
 	@Test(expected = Exception.class)
 	public void testGetEmailDispositionForWhiteSpace() throws Exception {
 		// tracking id is white space
-		GetEmailDispositionResponse spaceResponse = email.getEmailDisposition(" ");
+		email.getEmailDisposition(" ");
 	}
 	
 	
@@ -286,13 +286,13 @@ public class TestEmailService {
 	@Test(expected=Exception.class)
 	public void testSendMessageForContentNull() throws Exception {
 		message.setContent(null);
-		SendMessageResponse response = email.sendMessage(message);
+		email.sendMessage(message);
 	}
 	
 	@Test(expected=Exception.class)
 	public void testSendMessageForHeader() throws Exception {
 		message.setHeader(null);
-		SendMessageResponse response = email.sendMessage(message);
+		email.sendMessage(message);
 	}	
 	
 	@Test
