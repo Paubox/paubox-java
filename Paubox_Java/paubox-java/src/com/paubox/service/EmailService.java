@@ -20,6 +20,7 @@ import org.json.simple.JSONArray;
 public class EmailService implements EmailInterface {
 
 	private String baseApiUrl = "https://api.paubox.net/v1/" + Constants.API_USER + "/";
+	private static final String EMAIL_API_URL = "https://api.paubox.com/v1/email/";
 
 	public GetEmailDispositionResponse getEmailDisposition(String sourceTrackingId) throws Exception {
 		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId;
@@ -73,13 +74,13 @@ public class EmailService implements EmailInterface {
 		requestJSON.put("data", dataJSON);
 
 		String reqBody = mapper.writeValueAsString(requestJSON);
-		String url = baseApiUrl + "schedule";
+		String url = EMAIL_API_URL + "schedule";
 		String responseStr = APIHelper.callToAPIByPost(url, getAuthorizationHeader(), reqBody);
 		return mapper.readValue(responseStr, ScheduleMessageResponse.class);
 	}
 
 	public ScheduledMessageStatus getScheduledMessage(String sourceTrackingId) throws Exception {
-		String url = baseApiUrl + "schedule/" + sourceTrackingId;
+		String url = EMAIL_API_URL + "schedule/" + sourceTrackingId;
 		String responseStr = APIHelper.callToAPIByGet(url, getAuthorizationHeader());
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -94,13 +95,13 @@ public class EmailService implements EmailInterface {
 		requestJSON.put("scheduled_at", scheduledAt);
 
 		String reqBody = mapper.writeValueAsString(requestJSON);
-		String url = baseApiUrl + "schedule/" + sourceTrackingId;
+		String url = EMAIL_API_URL + "schedule/" + sourceTrackingId;
 		String responseStr = APIHelper.callToAPIByPatch(url, getAuthorizationHeader(), reqBody);
 		return mapper.readValue(responseStr, RescheduleResponse.class);
 	}
 
 	public CancelScheduledResponse cancelScheduledMessage(String sourceTrackingId) throws Exception {
-		String url = baseApiUrl + "schedule/" + sourceTrackingId + "/cancel";
+		String url = EMAIL_API_URL + "schedule/" + sourceTrackingId + "/cancel";
 		String responseStr = APIHelper.callToAPIByPost(url, getAuthorizationHeader(), "{}");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -160,69 +161,14 @@ public class EmailService implements EmailInterface {
 		return messageJSON;
 	}
 
-	private String formatMessage(Message message) throws Exception{
-						
-		JSONObject messageJSON = new JSONObject();		
-		JSONObject contentJSON = null;
-		JSONObject headerJSON = null;
-		JSONObject attachmentJSON = null;		
-        JSONObject requestJSON = new JSONObject();
-        JSONObject dataJSON = new JSONObject();
-        JSONArray attachmentJSONArray = new JSONArray();
-		
-		if (message.getHeader() != null) {
-			
-			headerJSON = new JSONObject();
-			headerJSON.put("subject" , message.getHeader().getSubject());
-			headerJSON.put("from" , message.getHeader().getFrom());
-			headerJSON.put("reply-to" , message.getHeader().getReplyTo());						
-        }
-        else {
-            throw new Exception("Message Header cannot be null.");
-        }
-		
-		if (message.getContent() != null){
-			
-			contentJSON = new JSONObject();
-			contentJSON.put("text/plain" , message.getContent().getPlainText());
-			if(message.getContent().getHtmlText() != null)
-				contentJSON.put("text/html",Base64.getEncoder().encodeToString(message.getContent().getHtmlText().getBytes()));
-			
-		} else {
-            throw new Exception("Message Content cannot be null.");
-        }
-		
-		  //If there are attachments, then prepare attachment array JSON
-        if (message.getAttachments() != null && message.getAttachments().size() > 0) {        	           
-            for (Attachment attachment : message.getAttachments())
-            {
-            	attachmentJSON = new JSONObject();
-            	attachmentJSON.put("fileName" , attachment.getFileName());
-            	attachmentJSON.put("contentType" , attachment.getContentType());
-            	attachmentJSON.put("content" , attachment.getContent());
-    			    			               
-            	attachmentJSONArray.add(attachmentJSON);
-            }        	
-        }
+	private String formatMessage(Message message) throws Exception {
+		JSONObject messageJSON = buildMessageJSON(message);
+		JSONObject dataJSON = new JSONObject();
+		dataJSON.put("message", messageJSON);
+		JSONObject requestJSON = new JSONObject();
+		requestJSON.put("data", dataJSON);
 
-        messageJSON.put("bcc",message.getBcc()); 
-        messageJSON.put("cc",message.getCc());
-        messageJSON.put("recipients",message.getRecipients());        
-        messageJSON.put("headers",headerJSON);        
-        messageJSON.put("allowNonTLS",message.isAllowNonTLS());
-        String forceSecureNotification = message.getForceSecureNotification();
-        if(forceSecureNotification != null && !forceSecureNotification.isEmpty()){
-        	if(forceSecureNotification.equalsIgnoreCase("true"))
-        		messageJSON.put("forceSecureNotification",true);
-        	else if(forceSecureNotification.equalsIgnoreCase("false"))
-        		messageJSON.put("forceSecureNotification",false);
-        }
-        messageJSON.put("content",contentJSON);
-        messageJSON.put("attachments",attachmentJSONArray);
-        dataJSON.put("message",messageJSON);
-        requestJSON.put("data",dataJSON);
-        
-        ObjectMapper mapper = new ObjectMapper();		
+		ObjectMapper mapper = new ObjectMapper();
 		return mapper.writeValueAsString(requestJSON);
 	}
 
