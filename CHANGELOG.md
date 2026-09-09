@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/Paubox/paubox-java/compare/v1.0.0...v1.1.0) (2026-09-09)
+
+
+### Features
+
+* add scheduled send support ([#36](https://github.com/Paubox/paubox-java/issues/36)) ([3a0dd80](https://github.com/Paubox/paubox-java/commit/3a0dd80828c7900a7c5c6fadec468e0af9c8f392))
+
 ## 1.0.0 (2026-08-21)
 
 First tagged release. This SDK had never been published to a registry and had
