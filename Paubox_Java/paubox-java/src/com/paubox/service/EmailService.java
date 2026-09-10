@@ -119,7 +119,8 @@ public class EmailService implements EmailInterface {
 			headerJSON = new JSONObject();
 			headerJSON.put("subject", message.getHeader().getSubject());
 			headerJSON.put("from", message.getHeader().getFrom());
-			headerJSON.put("reply-to", message.getHeader().getReplyTo());
+			if (message.getHeader().getReplyTo() != null)
+				headerJSON.put("reply-to", message.getHeader().getReplyTo());
 		} else {
 			throw new Exception("Message Header cannot be null.");
 		}
@@ -143,8 +144,10 @@ public class EmailService implements EmailInterface {
 			}
 		}
 
-		messageJSON.put("bcc", message.getBcc());
-		messageJSON.put("cc", message.getCc());
+		if (message.getBcc() != null)
+			messageJSON.put("bcc", message.getBcc());
+		if (message.getCc() != null)
+			messageJSON.put("cc", message.getCc());
 		messageJSON.put("recipients", message.getRecipients());
 		messageJSON.put("headers", headerJSON);
 		messageJSON.put("allowNonTLS", message.isAllowNonTLS());
