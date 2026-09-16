@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -177,6 +178,27 @@ public class APIHelper {
 			return processApiResponse(response);
 
 		} catch (MalformedURLException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+	public static String callToAPIByDelete(String baseAPIUrl, String authHeader) throws Exception {
+		try {
+			DefaultHttpClient httpClient = newClient();
+
+			HttpDelete deleteRequest = new HttpDelete(baseAPIUrl);
+			deleteRequest.addHeader("accept", "application/json");
+
+			if (null != authHeader) {
+				deleteRequest.addHeader("Authorization", authHeader);
+			}
+
+			HttpResponse response = httpClient.execute(deleteRequest);
+			return processApiResponse(response);
+
+		} catch (ClientProtocolException e) {
 			throw new Exception(e);
 		} catch (IOException e) {
 			throw new Exception(e);
