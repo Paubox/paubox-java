@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/Paubox/paubox-java/compare/v1.1.1...v1.2.0) (2026-09-16)
+
+
+### Features
+
+* add receiving (inbound email) endpoints ([#41](https://github.com/Paubox/paubox-java/issues/41)) ([23bf289](https://github.com/Paubox/paubox-java/commit/23bf2893f57cfb9acfe3861a44e0fcb3c28c2e86))
+
 ## [1.1.1](https://github.com/Paubox/paubox-java/compare/v1.1.0...v1.1.1) (2026-09-10)
 
 
