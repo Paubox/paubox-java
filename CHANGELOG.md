@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0](https://github.com/Paubox/paubox-java/compare/v1.2.0...v1.3.0) (2026-09-17)
+
+
+### Features
+
+* webhook endpoint CRUD support ([#43](https://github.com/Paubox/paubox-java/issues/43)) ([0dd522a](https://github.com/Paubox/paubox-java/commit/0dd522a6349387c2ae9a262d41c72182a41bd533))
+
 ## [1.2.0](https://github.com/Paubox/paubox-java/compare/v1.1.1...v1.2.0) (2026-09-16)
 
 
