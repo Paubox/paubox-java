@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1](https://github.com/Paubox/paubox-java/compare/v1.3.0...v1.3.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **receiving:** use the /v1/email base and attachment UUIDs ([#45](https://github.com/Paubox/paubox-java/issues/45)) ([51d7ada](https://github.com/Paubox/paubox-java/commit/51d7ada61599dc4977a957e5e465c71f8ab928dc))
+
 ## [1.3.0](https://github.com/Paubox/paubox-java/compare/v1.2.0...v1.3.0) (2026-09-17)
 
 
