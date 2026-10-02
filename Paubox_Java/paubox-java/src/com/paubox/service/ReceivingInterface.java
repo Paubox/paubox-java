@@ -22,6 +22,6 @@ public interface ReceivingInterface {
 
 	public String getReceivedEmail(String emailId) throws Exception;
 
-	public byte[] getReceivedEmailAttachment(String emailId, String blobId) throws Exception;
+	public byte[] getReceivedEmailAttachment(String emailId, String attachmentId) throws Exception;
 
 }
