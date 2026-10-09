@@ -17,6 +17,13 @@ The API wrapper allows you to construct and send messages.
   * [Paubox Forms](#paubox-forms)
     * [Respondent endpoints](#forms-respondent-endpoints)
     * [Forms management](#forms-management)
+* [Webhooks](#webhooks)
+  * [Creating a webhook endpoint](#creating-a-webhook-endpoint)
+  * [Listing webhook endpoints](#listing-webhook-endpoints)
+  * [Getting a webhook endpoint](#getting-a-webhook-endpoint)
+  * [Updating a webhook endpoint](#updating-a-webhook-endpoint)
+  * [Deleting a webhook endpoint](#deleting-a-webhook-endpoint)
+  * [Webhook error handling](#webhook-error-handling)
 * [Contributing](#contributing)
 * [License](#license)
 
@@ -509,6 +516,116 @@ static void DownloadSubmissions(String formId, String submissionId) throws Excep
     Files.write(Paths.get("submission.pdf"), pdf);
 }
 ```
+
+<a name="#webhooks"></a>
+## Webhooks
+
+A webhook endpoint is a URL you own that Paubox notifies when something happens. `WebhookService`
+manages those subscriptions: which URL to notify, and for which events.
+
+Construct it with a **scoped API key**, sent as `Authorization: Bearer <key>`:
+
+```java
+import com.paubox.service.WebhookInterface;
+import com.paubox.service.WebhookService;
+
+WebhookInterface webhooks = new WebhookService("YOUR-SCOPED-API-KEY");
+```
+
+The no-arg constructor reads `Constants.WEBHOOKS_API_KEY`, which `ConfigurationManager` fills from
+the `WEBHOOKSAPIKEY` property.
+
+Which events a key may subscribe to follows from its scopes. The SDK does not inspect them — the
+service refuses an event the key isn't scoped for with 403, and an unrecognised event with 422.
+
+### Creating a webhook endpoint
+
+```java
+CreatedWebhookEndpoint created = webhooks.createWebhookEndpoint(
+    new CreateWebhookEndpointRequest(
+        "https://example.com/paubox-webhook",
+        Arrays.asList("forms.submission.created")));
+
+System.out.println(created.getId());             // UUID
+System.out.println(created.getSigningSecret());  // whsec_... — store this now
+```
+
+The signing secret is returned **once**, here. It is not on `getWebhookEndpoint` or
+`listWebhookEndpoints`, and there is no way to read it back — recovering from a lost secret means
+deleting the endpoint and creating a new one. It lives on `CreatedWebhookEndpoint` and no other
+type for exactly that reason.
+
+### Listing webhook endpoints
+
+```java
+WebhookEndpointListResponse result = webhooks.listWebhookEndpoints();
+
+for (WebhookEndpoint endpoint : result.getData()) {
+    System.out.println(endpoint.getId() + " " + endpoint.getTargetUrl() + " " + endpoint.getStatus());
+}
+
+System.out.println(result.getPageInfo().getCount());  // total matching, not this page's length
+```
+
+To paginate:
+
+```java
+WebhookEndpointListRequest request = new WebhookEndpointListRequest();
+request.setPage(2);
+request.setItems(25);
+
+WebhookEndpointListResponse page2 = webhooks.listWebhookEndpoints(request);
+```
+
+### Getting a webhook endpoint
+
+```java
+WebhookEndpoint endpoint = webhooks.getWebhookEndpoint("2ec66c21-bf48-48eb-8d28-f80b2d6b77c7");
+```
+
+### Updating a webhook endpoint
+
+Only the fields you set are sent, so changing the status leaves the URL and events alone:
+
+```java
+UpdateWebhookEndpointRequest update = new UpdateWebhookEndpointRequest();
+update.setStatus("disabled");
+
+WebhookEndpoint updated = webhooks.updateWebhookEndpoint(endpoint.getId(), update);
+```
+
+Pausing deliveries without losing the subscription is what `disabled` is for; set `active` to
+resume. Setting `events` replaces the list rather than adding to it.
+
+### Deleting a webhook endpoint
+
+```java
+webhooks.deleteWebhookEndpoint(endpoint.getId());
+```
+
+Returns nothing — the service answers `204 No Content`. Deleting stops every event on that
+endpoint, and the signing secret goes with it.
+
+### Webhook error handling
+
+A non-2xx response throws `PauboxWebhooksException`, which carries the status code and raw body
+separately so they can be branched on rather than parsed out of a message string:
+
+```java
+import com.paubox.common.PauboxWebhooksException;
+
+try {
+    webhooks.createWebhookEndpoint(request);
+} catch (PauboxWebhooksException e) {
+    System.out.println(e.getStatusCode());    // 422
+    System.out.println(e.getMessage());       // createWebhookEndpoint failed: HTTP 422: target_url: ...
+    System.out.println(e.getResponseBody());  // raw response
+}
+```
+
+Two cases worth handling explicitly: subscribing a `target_url` that already has an endpoint comes
+back as 422, and an id that doesn't belong to your account is a 404 rather than a 403. An id that
+isn't a UUID is rejected locally, with `getStatusCode()` of 0, before any request is made.
 
 <a name="#contributing"></a>
 ## Contributing

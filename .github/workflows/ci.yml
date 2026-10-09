@@ -33,11 +33,26 @@ jobs:
       - name: Compile the SDK
         run: mvn -B --no-transfer-progress compile
 
-      - name: Compile the test sources
-        # Compiled but not executed: every test here reads config.properties and
-        # calls the live API. Compiling them catches signature drift between the
-        # SDK and its own tests, which nothing checked before.
-        run: mvn -B --no-transfer-progress test-compile
+      - name: Compile the test sources and run the offline ones
+        # `test` compiles every test here, which catches signature drift between
+        # the SDK and its own tests, and runs the offline suites (*Test.java).
+        # The live suites (Test*.java) read config.properties and call the real
+        # API, so surefire excludes them; see the pom.
+        run: mvn -B --no-transfer-progress test
+
+      - name: Assert the offline tests actually ran
+        # Surefire reports success when its include pattern matches nothing, so
+        # a green build is not by itself evidence that a test executed. Floors,
+        # not targets.
+        run: |
+          ran=$(grep -ho 'tests="[0-9]*"' target/surefire-reports/*.xml \
+            | grep -o '[0-9]*' | awk '{total += $1} END {print total + 0}')
+          echo "tests_run=${ran:-0}"
+          if [ "${ran:-0}" -lt 15 ]; then
+            echo "FAIL: expected at least 15 offline tests to run" >&2
+            exit 1
+          fi
+          echo "OK: ran $ran offline tests"
 
       - name: Assert the build produced classes
         # "Nothing to compile" also exits 0, so a green build is not by itself
