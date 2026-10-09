@@ -7,7 +7,7 @@ Developer context for working on this SDK.
 This repo is the official Java wrapper for two Paubox APIs:
 
 - **Paubox Email API** — send HIPAA-compliant emails, check delivery status. Requires an API key and username. Base URL: `https://api.paubox.net/v1/{API_USER}/`
-- **Paubox Forms API** — retrieve form definitions, submit responses, and manage forms/submissions. Public respondent endpoints (get public form data, submit) need no key; management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF export) need a scoped API key with the `forms` scope. Base URL: `https://apx.paubox.com/forms`
+- **Paubox Forms API** — retrieve form definitions, submit responses, and manage forms/submissions. Public respondent endpoints (get public form data, submit) need no key; management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF export) need a scoped API key with the `forms` scope. Base URL: `https://api.paubox.com/v1/forms`
 
 ## Project Layout
 

@@ -12,5 +12,5 @@ public class Constants {
 	
 	public  final static  int HTTP_STATUS_SUCCESS = 200;
 
-	public  final static  String FORMS_BASE_URL = "https://apx.paubox.com/forms";
+	public  final static  String FORMS_BASE_URL = "https://api.paubox.com/v1/forms";
 }

@@ -111,7 +111,7 @@ GetEmailDispositionResponse response = email.getEmailDisposition(sourceTrackingI
 
 ## Forms API
 
-Base URL: `https://apx.paubox.com/forms`  
+Base URL: `https://api.paubox.com/v1/forms`  
 Authentication: **None** for respondent endpoints (`getForm`, `submitForm`); **scoped API key** for all other methods
 
 #### Authentication
