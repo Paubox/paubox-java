@@ -19,14 +19,23 @@
         </configuration>
       </plugin>
       
-      <!-- Every test in src/test calls the live API and needs config.properties,
-           so they are not run as part of a build. Set -DskipTests=false to run
-           them deliberately with credentials present. -->
+      <!-- Two kinds of test live in src/test, told apart by name:
+
+             *Test.java  offline, no credentials, runs on every build
+             Test*.java  calls the live API and needs config.properties
+
+           Only the offline ones run here. Run the live suites deliberately
+           with -Dtest=TestWebhookService once credentials are in place. -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
-          <skipTests>true</skipTests>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <excludes>
+            <exclude>**/Test*.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
 

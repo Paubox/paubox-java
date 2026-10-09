@@ -111,7 +111,7 @@ GetEmailDispositionResponse response = email.getEmailDisposition(sourceTrackingI
 
 ## Forms API
 
-Base URL: `https://apx.paubox.com/forms`  
+Base URL: `https://api.paubox.com/v1/forms`  
 Authentication: **None** for respondent endpoints (`getForm`, `submitForm`); **scoped API key** for all other methods
 
 #### Authentication
@@ -561,3 +561,175 @@ byte[] pdf = forms.downloadSubmissionPdf(formId, submissionId);
 | `submissionId` | `String` | UUID of the submission |
 
 Throws `Exception` on a non-200 response.
+## Webhooks API
+
+Base URL: `https://api.paubox.com/v1/webhooks`  
+Authentication: **scoped API key**, sent as `Authorization: Bearer {WEBHOOKS_API_KEY}`
+
+A webhook endpoint is a URL you own that Paubox notifies when something happens. `WebhookService`
+manages those subscriptions: which URL to notify, and for which events.
+
+Every request carries the `/endpoints` resource. The bare base is unrouted on the public gateway
+by design: the rule is scoped to `/endpoints` so the producers' event-ingest route stays private.
+
+Which events a key may subscribe to follows from its scopes. The SDK does not inspect them, so an
+event the key is not scoped for returns 403 and an unrecognised one 422.
+
+### Setup
+
+```java
+import com.paubox.service.WebhookInterface;
+import com.paubox.service.WebhookService;
+
+WebhookInterface webhooks = new WebhookService("YOUR-SCOPED-API-KEY");
+```
+
+The no-arg constructor reads `Constants.WEBHOOKS_API_KEY`, which `ConfigurationManager` fills from
+the `WEBHOOKSAPIKEY` property. A third constructor takes a base URL and a `WebhookTransport`, for
+staging, regional endpoints, and tests.
+
+---
+
+### `listWebhookEndpoints()` / `listWebhookEndpoints(WebhookEndpointListRequest)`
+
+**Endpoint:** `GET /endpoints`
+
+Returns the endpoints this key can act on. Endpoints carrying an event the key is not scoped for
+are filtered out by the service.
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `page` | `Integer` | Optional. 1-based page number |
+| `items` | `Integer` | Optional. Page size |
+
+A null field is left off the query string, letting the service pick its own default.
+
+**Returns** `WebhookEndpointListResponse` — `getData()` plus `getPageInfo()`. The envelope is kept
+rather than flattened to the rows: `getPageInfo().getCount()` is the total number of matching
+endpoints, not the length of `getData()`, and a caller paginating needs it.
+
+```java
+WebhookEndpointListResponse result = webhooks.listWebhookEndpoints();
+
+WebhookEndpointListRequest request = new WebhookEndpointListRequest();
+request.setPage(2);
+request.setItems(25);
+WebhookEndpointListResponse page2 = webhooks.listWebhookEndpoints(request);
+```
+
+---
+
+### `createWebhookEndpoint(CreateWebhookEndpointRequest)`
+
+**Endpoint:** `POST /endpoints`
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `targetUrl` | `String` | Yes | An https URL resolving to a publicly routable address |
+| `events` | `List<String>` | Yes | Non-empty list of event names |
+
+**Returns** `CreatedWebhookEndpoint`, carrying `getSigningSecret()`.
+
+```java
+CreatedWebhookEndpoint created = webhooks.createWebhookEndpoint(
+    new CreateWebhookEndpointRequest(
+        "https://example.com/paubox-webhook",
+        Arrays.asList("forms.submission.created")));
+
+created.getSigningSecret(); // whsec_...
+```
+
+The signing secret is returned **only here**. It is absent from get and list and cannot be read
+back: recovering from a lost secret means replacing the endpoint. That is why it lives on
+`CreatedWebhookEndpoint` and no other type.
+
+Event names are not validated client-side — the catalog belongs to the service and grows without
+an SDK release.
+
+Throws `PauboxWebhooksException` with status 422 for a missing or malformed `targetUrl`, an empty
+`events`, an unrecognised event, or a `targetUrl` that already has an endpoint; 403 for an event
+this key is not scoped for.
+
+---
+
+### `getWebhookEndpoint(String id)`
+
+**Endpoint:** `GET /endpoints/{id}`
+
+**Parameters**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | `String` | Endpoint UUID |
+
+**Returns** `WebhookEndpoint`, unwrapped from its `data` envelope. The signing secret is not
+included.
+
+Throws `PauboxWebhooksException` with status 404 if no such endpoint exists, or it belongs to
+another account. An id that is not UUID-shaped throws with status 0, before any request is sent.
+
+---
+
+### `updateWebhookEndpoint(String id, UpdateWebhookEndpointRequest)`
+
+**Endpoint:** `PATCH /endpoints/{id}`
+
+A partial update: null fields are left out of the request rather than sent as null, so changing
+the status leaves the URL and events alone.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `targetUrl` | `String` | No | New delivery target |
+| `status` | `String` | No | `"active"` or `"disabled"` |
+| `events` | `List<String>` | No | Replaces the list rather than adding to it |
+
+```java
+UpdateWebhookEndpointRequest update = new UpdateWebhookEndpointRequest();
+update.setStatus("disabled");
+
+WebhookEndpoint updated = webhooks.updateWebhookEndpoint(id, update);
+```
+
+`disabled` pauses deliveries without losing the subscription; `active` resumes them.
+
+---
+
+### `deleteWebhookEndpoint(String id)`
+
+**Endpoint:** `DELETE /endpoints/{id}`
+
+Returns nothing — the service answers `204 No Content`. Deleting stops every event on that
+endpoint and discards its signing secret.
+
+```java
+webhooks.deleteWebhookEndpoint(id);
+```
+
+---
+
+### Webhook errors
+
+Every non-2xx response throws `com.paubox.common.PauboxWebhooksException`, which carries the
+status and raw body separately so they can be branched on rather than parsed out of a message
+string:
+
+```java
+try {
+    webhooks.createWebhookEndpoint(request);
+} catch (PauboxWebhooksException e) {
+    e.getStatusCode();   // 422, or 0 when the request never left the SDK
+    e.getMessage();      // createWebhookEndpoint failed: HTTP 422: target_url: ...
+    e.getUrl();
+    e.getResponseBody(); // raw response
+}
+```
+
+The service's own message is promoted onto the exception message, since a bare status says
+nothing about which field was wrong. A body that is not JSON leaves the message as just the
+status, with the raw body still on `getResponseBody()`.
