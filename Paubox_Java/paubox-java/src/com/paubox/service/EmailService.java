@@ -9,7 +9,6 @@ import com.paubox.data.Attachment;
 import com.paubox.data.CancelScheduledResponse;
 import com.paubox.data.GetEmailDispositionResponse;
 import com.paubox.data.Message;
-import com.paubox.data.MessageDeliveries;
 import com.paubox.data.RescheduleResponse;
 import com.paubox.data.ScheduleMessageResponse;
 import com.paubox.data.ScheduledMessageStatus;
@@ -24,7 +23,10 @@ public class EmailService implements EmailInterface {
 
 	public GetEmailDispositionResponse getEmailDisposition(String sourceTrackingId) throws Exception {
 		String url = baseApiUrl + "message_receipt?sourceTrackingId=" + sourceTrackingId;
-		String responseStr = APIHelper.callToAPIByGet(url, getAuthorizationHeader());
+		return parseEmailDisposition(APIHelper.callToAPIByGet(url, getAuthorizationHeader()));
+	}
+
+	static GetEmailDispositionResponse parseEmailDisposition(String responseStr) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		GetEmailDispositionResponse response = (GetEmailDispositionResponse) mapper.readValue(responseStr,
@@ -32,17 +34,6 @@ public class EmailService implements EmailInterface {
 		 if (response.getData() == null && response.getSourceTrackingId() == null && response.getErrors() == null)
          {
 			 throw new IOException(responseStr);
-         }
-
-         if (response != null && response.getData() != null && response.getData().getMessage() != null
-             && response.getData().getMessage().getMessage_deliveries() != null &&
-             response.getData().getMessage().getMessage_deliveries().size() > 0)
-         {
-        	 for (MessageDeliveries messageDeliveries : response.getData().getMessage().getMessage_deliveries()) {
-                 if (null!=messageDeliveries.getStatus().getOpenedStatus()) {
-                	 messageDeliveries.getStatus().setOpenedStatus("unopened");
-                 }
-             }
          }
 		return response;
 	}
