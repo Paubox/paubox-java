@@ -104,7 +104,7 @@ GetEmailDispositionResponse response = email.getEmailDisposition(sourceTrackingI
 |---|---|---|
 | `deliveryStatus` | `String` | e.g. `"delivered"` |
 | `deliveryTime` | `Timestamp` | When delivered |
-| `openedStatus` | `String` | `"opened"` or `"unopened"` |
+| `openedStatus` | `String` | `"opened"`, or `null` if not opened |
 | `openedTime` | `Timestamp` | When first opened (null if unopened) |
 
 ---

@@ -3,6 +3,9 @@
   <groupId>Paubox</groupId>
   <artifactId>Paubox</artifactId>
   <version>1.3.1</version>
+  <properties>
+    <skipTests>true</skipTests>
+  </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <!-- Test sources are excluded from the main compile below; pointing Maven
@@ -19,15 +22,12 @@
         </configuration>
       </plugin>
       
-      <!-- Every test in src/test calls the live API and needs config.properties,
-           so they are not run as part of a build. Set -DskipTests=false to run
-           them deliberately with credentials present. -->
+      <!-- The tests in src/test/test call the live API and need config.properties,
+           so they are skipped by default (the skipTests property above). Set
+           -DskipTests=false to run them deliberately with credentials present. -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
       </plugin>
 
       <!-- Maven Assembly Plugin -->

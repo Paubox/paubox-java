@@ -39,6 +39,9 @@ jobs:
         # SDK and its own tests, which nothing checked before.
         run: mvn -B --no-transfer-progress test-compile
 
+      - name: Run the offline unit tests
+        run: mvn -B --no-transfer-progress test -DskipTests=false -Dtest='com.paubox.**.*Test' -Dsurefire.failIfNoSpecifiedTests=false
+
       - name: Assert the build produced classes
         # "Nothing to compile" also exits 0, so a green build is not by itself
         # evidence that anything was built. Floors, not targets.
