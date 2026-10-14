@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0](https://github.com/Paubox/paubox-java/compare/v1.3.1...v2.0.0) (2026-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* manage webhook subscriptions on the Paubox webhooks service ([#47](https://github.com/Paubox/paubox-java/issues/47))
+
+### Features
+
+* manage webhook subscriptions on the Paubox webhooks service ([#47](https://github.com/Paubox/paubox-java/issues/47)) ([032c1f0](https://github.com/Paubox/paubox-java/commit/032c1f05479462ede2ec0fd2cccc2af6cfa1c8d2))
+
 ## [1.3.1](https://github.com/Paubox/paubox-java/compare/v1.3.0...v1.3.1) (2026-10-02)
 
 
