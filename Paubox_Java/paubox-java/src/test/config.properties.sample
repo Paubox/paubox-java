@@ -4,5 +4,6 @@ BASE_URL=<microservice base URL>
 RECIPIENTS=<test@test.com where you want the email to go to >
 PDFFILE=src/test/testFile.pdf # for pdf attachment test
 FORMSAPIKEY=<scoped API key with the forms scope - required for Forms management endpoints>
+WEBHOOKSAPIKEY=<scoped API key - required for the webhook endpoint tests>
 FORM_ID=<uuid of an existing form - for forms tests>
 CUSTOMER_ID=<your Paubox customer id - for the form create/update tests>

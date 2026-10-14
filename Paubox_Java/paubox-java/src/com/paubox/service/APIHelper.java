@@ -263,4 +263,132 @@ public class APIHelper {
 		}
 	}
 
+	/**
+	 * Call http GET API, keeping the status code.
+	 * @param baseAPIUrl String
+	 * @param authHeader String
+	 * @return ApiResponse
+	 * @throws Exception
+	 */
+	public static ApiResponse callToAPIByGetWithResponse(String baseAPIUrl, String authHeader) throws Exception {
+		try {
+			HttpGet request = new HttpGet(baseAPIUrl);
+			request.addHeader("accept", "application/json");
+			if (null != authHeader) {
+				request.addHeader("Authorization", authHeader);
+			}
+			return readResponse(newClient().execute(request));
+
+		} catch (ClientProtocolException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+	/**
+	 * Call http POST API, keeping the status code.
+	 * @param baseAPIUrl String
+	 * @param authHeader String
+	 * @param requestBody String
+	 * @return ApiResponse
+	 * @throws Exception
+	 */
+	public static ApiResponse callToAPIByPostWithResponse(String baseAPIUrl, String authHeader, String requestBody)
+			throws Exception {
+		try {
+			HttpPost request = new HttpPost(baseAPIUrl);
+			StringEntity input = new StringEntity(requestBody, "UTF-8");
+			input.setContentType("application/json");
+			request.setEntity(input);
+			request.addHeader("accept", "application/json");
+			if (null != authHeader) {
+				request.addHeader("Authorization", authHeader);
+			}
+			return readResponse(newClient().execute(request));
+
+		} catch (ClientProtocolException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+	/**
+	 * Call http PATCH API, keeping the status code.
+	 * @param baseAPIUrl String
+	 * @param authHeader String
+	 * @param requestBody String
+	 * @return ApiResponse
+	 * @throws Exception
+	 */
+	public static ApiResponse callToAPIByPatchWithResponse(String baseAPIUrl, String authHeader, String requestBody)
+			throws Exception {
+		try {
+			HttpPatch request = new HttpPatch(baseAPIUrl);
+			StringEntity input = new StringEntity(requestBody, "UTF-8");
+			input.setContentType("application/json");
+			request.setEntity(input);
+			request.addHeader("accept", "application/json");
+			if (null != authHeader) {
+				request.addHeader("Authorization", authHeader);
+			}
+			return readResponse(newClient().execute(request));
+
+		} catch (ClientProtocolException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+	/**
+	 * Call http DELETE API, keeping the status code.
+	 * @param baseAPIUrl String
+	 * @param authHeader String
+	 * @return ApiResponse
+	 * @throws Exception
+	 */
+	public static ApiResponse callToAPIByDeleteWithResponse(String baseAPIUrl, String authHeader) throws Exception {
+		try {
+			HttpDelete request = new HttpDelete(baseAPIUrl);
+			request.addHeader("accept", "application/json");
+			if (null != authHeader) {
+				request.addHeader("Authorization", authHeader);
+			}
+			return readResponse(newClient().execute(request));
+
+		} catch (ClientProtocolException e) {
+			throw new Exception(e);
+		} catch (IOException e) {
+			throw new Exception(e);
+		}
+	}
+
+	/**
+	 * Reads status and body together.
+	 *
+	 * <p>A 204 carries no entity at all, so {@code getEntity()} is null there
+	 * and the body is reported as empty rather than dereferenced.</p>
+	 */
+	private static ApiResponse readResponse(HttpResponse response) throws IOException {
+		int code = response.getStatusLine().getStatusCode();
+
+		if (response.getEntity() == null) {
+			return new ApiResponse(code, "");
+		}
+
+		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+		try {
+			StringBuilder result = new StringBuilder();
+			String line;
+			while ((line = rd.readLine()) != null) {
+				result.append(line);
+			}
+			return new ApiResponse(code, result.toString());
+		} finally {
+			rd.close();
+		}
+	}
+
 }

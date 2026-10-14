@@ -33,6 +33,7 @@ public class ConfigurationManager {
 		Constants.API_KEY=properties.getProperty("APIKEY");
 		Constants.API_USER=properties.getProperty("APIUSER");
 		Constants.FORMS_API_KEY = properties.getProperty("FORMSAPIKEY");
+		Constants.WEBHOOKS_API_KEY = properties.getProperty("WEBHOOKSAPIKEY");
 		
 	}
 
